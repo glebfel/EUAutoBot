@@ -129,5 +129,6 @@ async def get_car_data(url: str) -> Car:
         car['price_with_vat'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
     else:
         # for rus version of the site
-        car['price_with_vat'] = page.find(class_='header-price-box g-col-4').text
+        car['price_with_vat'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text)
+        car['price'] = round(int(car['price_with_vat'])*100/119)
     return Car.parse_obj(car)

@@ -17,6 +17,7 @@ class Car(BaseModel):
     damaged: bool = Field(description="if car was ever damaged or not", default=False)
     price: Euros
     price_with_vat: Euros
+    vat: int = Field(description="VAT tax value", default=19)
 
 
 class Customs(BaseModel):

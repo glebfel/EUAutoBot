@@ -1,0 +1,1 @@
+from telegram_bot.handlers.client import register_client_handlers

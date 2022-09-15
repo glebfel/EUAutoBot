@@ -56,7 +56,7 @@ def _validate_digit_value(digit_value: str) -> str:
     """validate digit values (https://calcus.ru/ format)"""
     val = ''
     for _ in digit_value.strip().replace('.', '').replace(' ', ''):
-        if _.isdigit():
+        if _.isdigit() and _ != '³':
             val += _
     return val
 
@@ -122,11 +122,12 @@ async def get_car_data(url: str) -> Car:
                 car['damaged'] = True
 
     # parse price
-    price = page.find(class_='main-price-and-rating-row')
+    price = page.find(class_='price-and-financing-row')
     # ger/eng version of the site
     if price:
-        car['price'] = (price.text.split('€')[0]).strip().replace(".", "")
+        car['price'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
+        car['price_with_vat'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
     else:
         # for rus version of the site
-        car['price'] = page.find(class_='header-price-box g-col-4').text
+        car['price_with_vat'] = page.find(class_='header-price-box g-col-4').text
     return Car.parse_obj(car)

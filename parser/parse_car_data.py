@@ -62,6 +62,7 @@ def _validate_digit_value(digit_value: str) -> str:
 
 
 async def get_car_data(url: str) -> Car:
+    """Get info about the car by link (in https://calcus.ru/ format)"""
     # validate link
     if not _validate_link(url):
         raise exceptions.InvalidUrlError(url)

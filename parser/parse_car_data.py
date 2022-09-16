@@ -140,8 +140,14 @@ async def get_car_data(url: str) -> Car:
     price = page.find(class_='price-and-financing-row')
     # ger/eng version of the site
     if price:
-        car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
-        car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
+        num_of_prices = len(page.find(class_='price-and-financing-row').text.split('€'))
+        if num_of_prices > 2:
+            car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
+            car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
+        else:
+            car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
+            car['price_eu'] = round(int(car['price_with_vat_eu']) * 100 / 119)
+
     else:
         # for rus version of the site
         car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[0])

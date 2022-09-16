@@ -25,13 +25,14 @@ async def process_start_command(message: types.Message):
 @dp.message_handler(commands=['help'])
 async def process_help_command(message: types.Message):
     await message.answer(text(bold("Доступные команды:"),
-                              "/start - возврат к началу ⏭",
+                              "/start - возврат к началу ⬆",
                               "/moderate - режим модератора 🖥 (доступен только администратору бота)",
                               sep="\n"
                               ),
                          parse_mode=ParseMode.MARKDOWN)
 
 
+@dp.callback_query_handler(text='retry', state=None)
 @dp.callback_query_handler(text='calculate', state=None)
 async def process_calculate_button(callback: CallbackQuery):
     await FSM.link.set()
@@ -42,7 +43,7 @@ async def process_calculate_button(callback: CallbackQuery):
 @dp.callback_query_handler(text='cancel', state="*")
 async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(text("Благодарим Вас за использование нашего бота 😊",
-                                       "Выполните команду /start чтобы вернуться к началу ⏭",
+                                       "Выполните команду /start чтобы вернуться к началу ⬆",
                                        sep="\n\n"))
     await callback.answer()
     await state.finish()
@@ -57,13 +58,11 @@ async def process_link_input(message: types.Message, state: FSMContext):
         # calculate customs upon given car info
         customs = await calculate_customs(car)
         await message.answer(str(customs))
-        await state.finish()
     except NotUrlError:
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
-                                  f'◽ или с помощью кнопки {(italic("поделиться"))} в приложении 📱',
-                                  'И попробуйте еще раз',
+                                  f'◽ воспользуйтесь кнопкой {(italic("поделиться"))} в приложении 📱',
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
@@ -71,8 +70,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
         await message.answer(text('Похоже Вы передали ссылку на другой сайт 🤔',
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
-                                  f'◽ или с помощью кнопки {(italic("поделиться"))} в приложении 📱',
-                                  'И попробуйте еще раз',
+                                  f'◽ воспользуйтесь кнопкой {(italic("поделиться"))} в приложении 📱',
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
@@ -81,6 +79,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
         await message.answer(text("Что-то пошло не так ... 🥴",
                                   "Повторите попытку позже 😔",
                                   sep="\n\n"))
+    finally:
         await state.finish()
 
 

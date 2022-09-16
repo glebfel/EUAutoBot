@@ -55,13 +55,13 @@ def _validate_age(age: str) -> str:
 
 def _validate_engine(engine: str) -> int:
     """validate engine type (https://calcus.ru/ format)"""
-    if engine.strip() in ['Бензиновый', 'Benzin', 'Petrol']:
+    if engine.strip().split(",")[0] in ['Бензиновый', 'Benzin', 'Petrol']:
         return 1
-    if engine.strip() in ['Дизельный', 'Diesel']:
+    if engine.strip().split(",")[0] in ['Дизельный', 'Diesel']:
         return 2
-    if engine.strip() in ['Гибридный', 'Hybrid']:
+    if engine.strip().split(",")[0] in ['Гибридный', 'Hybrid']:
         return 3
-    if engine.strip() in ['Электрический', 'Electric']:
+    if engine.strip().split(",")[0] in ['Электрический', 'Electric']:
         return 4
 
 
@@ -142,6 +142,6 @@ async def get_car_data(url: str) -> Car:
         car['price_with_vat'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
     else:
         # for rus version of the site
-        car['price_with_vat'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text)
+        car['price_with_vat'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[0])
         car['price'] = round(int(car['price_with_vat']) * 100 / 119)
     return Car.parse_obj(car)

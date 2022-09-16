@@ -3,6 +3,7 @@
 import pathlib
 import sys
 from datetime import datetime
+import re
 
 import validators
 import exceptions
@@ -56,13 +57,14 @@ def _validate_age(age: str) -> str:
 
 def _validate_engine(engine: str) -> int:
     """validate engine type (https://calcus.ru/ format)"""
-    if engine.strip().split(",")[0] in ['Бензиновый', 'Benzin', 'Petrol']:
+
+    if re.split(', | \\(', engine.strip())[0] in ['Бензиновый', 'Benzin', 'Petrol']:
         return 1
-    if engine.strip().split(",")[0] in ['Дизельный', 'Diesel']:
+    if re.split(', | \\(', engine.strip())[0] in ['Дизельный', 'Diesel']:
         return 2
-    if engine.strip().split(",")[0] in ['Гибридный', 'Hybrid']:
+    if re.split(', | \\(', engine.strip())[0] in ['Гибридный', 'Hybrid']:
         return 3
-    if engine.strip().split(",")[0] in ['Электрический', 'Electric']:
+    if re.split(', | \\(', engine.strip())[0] in ['Электрический', 'Electric']:
         return 4
 
 

@@ -6,7 +6,7 @@ from aiogram.utils.markdown import text, italic, bold
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from telegram_bot.init_bot import dp
-from telegram_bot.inline_keyboard import start_markup, error_markup
+from telegram_bot.inline_keyboard import start_markup, error_markup, car_info_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
 from parser import get_current_eu_rate
@@ -59,6 +59,7 @@ async def process_help_command(message: types.Message):
                          parse_mode=ParseMode.MARKDOWN)
 
 
+@dp.callback_query_handler(text='another', state=None)
 @dp.callback_query_handler(text='retry', state=None)
 @dp.callback_query_handler(text='calculate', state=None)
 async def process_calculate_button(callback: CallbackQuery):
@@ -79,12 +80,14 @@ async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
 @dp.message_handler(state=FSM.link)
 async def process_link_input(message: types.Message, state: FSMContext):
     try:
-        await message.answer(text('Выполняется запрос ⏳'))
+        await message.answer(text('Выполняю запрос ⏳'))
         # get info about the car from https://www.mobile.de/
         car = await get_car_data(message.text)
         # calculate customs upon given car info
         customs = await calculate_customs(car)
-        await message.answer(await format_bot_output(car, customs), parse_mode=ParseMode.MARKDOWN)
+        await message.answer(await format_bot_output(car, customs),
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=car_info_markup)
     except NotUrlError:
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   'Для того чтобы правильно передать ссылку:',

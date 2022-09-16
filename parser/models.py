@@ -20,7 +20,7 @@ class Car(BaseModel):
     engine: int = Field(ge=1, le=4, description="type of engine: 1 - gasoline; 2 - diesel; 3 - hybrid; 4 - electric")
     power_unit: int = Field(ge=1, le=2, description="engine power units: 1 - Hp; 2 - kW", default=1)
     power: int = Field(ge=0, description="engine power value")
-    value: float = Field(ge=0, description="engine capacity (in cubic centimeters)")
+    value: int = Field(ge=0, description="engine capacity (in cubic centimeters)")
     mileage: Kilometers = Field(ge=0, default=0)
     damaged: bool = Field(description="if car was ever damaged or not", default=False)
     price_eu: Euros

@@ -1,3 +1,5 @@
+import datetime
+
 from aiogram import types, Dispatcher
 from aiogram.types import ParseMode, CallbackQuery
 from aiogram.utils.markdown import text, italic, bold
@@ -7,14 +9,15 @@ from telegram_bot.init_bot import dp
 from telegram_bot.inline_keyboard import start_markup, error_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
+from parser import get_current_eu_rate
 
 
 class FSM(StatesGroup):
     link = State()
 
 
-def format_bot_output(car: Car, customs: Customs) -> str:
-    output_text = text(bold(car.name),
+async def format_bot_output(car: Car, customs: Customs) -> str:
+    output_text = text(str(bold(car.name).replace("\\", "")),
                        f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
                        f"{bold('Год постановки на учет:')} {car.age}",
                        f"{bold('Пробег:')} {car.mileage}",
@@ -27,7 +30,12 @@ def format_bot_output(car: Car, customs: Customs) -> str:
                        f"{bold('Пошлина:')} ₽{customs.tax:,}",
                        f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n",
                        f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n",
-                       bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙'),
+                       bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙\n'),
+                       f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_current_eu_rate()}₽",
+                       str(italic(
+                           "*расчет стоимости произведен с учетом курса ЦБ на день запроса +12% (курс обменников). В "
+                           "расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
+                           "возможных дополнительных платежей.")).replace("\\", ""),
                        sep="\n")
     return output_text
 
@@ -76,7 +84,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
         car = await get_car_data(message.text)
         # calculate customs upon given car info
         customs = await calculate_customs(car)
-        await message.answer(format_bot_output(car, customs), parse_mode=ParseMode.MARKDOWN)
+        await message.answer(await format_bot_output(car, customs), parse_mode=ParseMode.MARKDOWN)
     except NotUrlError:
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   'Для того чтобы правильно передать ссылку:',

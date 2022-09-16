@@ -1,6 +1,6 @@
 import json
 import aiohttp
-from models import Car, Customs
+from parser.models import Car, Customs
 
 BASE_URL = "https://calcus.ru/rastamozhka-auto"
 

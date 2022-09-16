@@ -5,9 +5,17 @@ class BasicBotException(Exception):
         return "Something goes wrong with bot"
 
 
-class InvalidUrlError(BasicBotException):
+class NotUrlError(BasicBotException):
     def __init__(self, url: str):
         self.url = url
 
     def __str__(self):
-        return f"Invalid link {self.url} was passed!"
+        return f"{self.url} is not url!"
+
+
+class AnotherUrlError(BasicBotException):
+    def __init__(self, url: str):
+        self.url = url
+
+    def __str__(self):
+        return f"{self.url} is url of the another web page!"

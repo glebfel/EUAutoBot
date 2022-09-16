@@ -1,19 +1,29 @@
-# parse https://www.mobile.de/
+# parse https://www.mobile.de/h
 
+import pathlib
+import sys
 from datetime import datetime
 
 import validators
 import exceptions
-from models import Car
+from parser.models import Car
 from bs4 import BeautifulSoup
 from arsenic import services, browsers, get_session
+
+# Корень проекта
+DIR_PATH = str(pathlib.Path(__file__).parent)
+
+if sys.platform.startswith('win'):
+    GECKODRIVER = DIR_PATH + '/geckodriver.exe'
+else:
+    GECKODRIVER = './geckodriver'
 
 BASIC_HEADER = {"Accept": "application/json",
                 "referer": "https://www.mobile.de/",
                 "User-Agent": "Mozilla/5.0 (compatible; MSIE 10.0; Macintosh; Intel Mac OS X 10_7_3; Trident/6.0)"}
 
 
-def _validate_link(url: str) -> bool:
+def _validate_link(url: str):
     """
     Basic link validation
     :param url: url of the car from https://www.mobile.de/
@@ -22,8 +32,11 @@ def _validate_link(url: str) -> bool:
     if validators.url(url):
         # validate if url contains is mobel.de
         if 'mobile.de' in url:
-            return True
-    return False
+            return
+        else:
+            raise exceptions.AnotherUrlError(url)
+    else:
+        raise exceptions.NotUrlError(url)
 
 
 def _validate_age(age: str) -> str:
@@ -64,11 +77,10 @@ def _validate_digit_value(digit_value: str) -> str:
 async def get_car_data(url: str) -> Car:
     """Get info about the car by link (in https://calcus.ru/ format)"""
     # validate link
-    if not _validate_link(url):
-        raise exceptions.InvalidUrlError(url)
+    _validate_link(url)
 
     # get page
-    service = services.Geckodriver()
+    service = services.Geckodriver(binary=GECKODRIVER)
     browser = browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}})
     async with get_session(service, browser) as session:
         await session.get(url)
@@ -131,5 +143,5 @@ async def get_car_data(url: str) -> Car:
     else:
         # for rus version of the site
         car['price_with_vat'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text)
-        car['price'] = round(int(car['price_with_vat'])*100/119)
+        car['price'] = round(int(car['price_with_vat']) * 100 / 119)
     return Car.parse_obj(car)

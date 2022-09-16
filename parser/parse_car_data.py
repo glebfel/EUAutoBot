@@ -9,6 +9,7 @@ import exceptions
 from parser.models import Car
 from bs4 import BeautifulSoup
 from arsenic import services, browsers, get_session
+from parser.get_exchange_rate import get_current_eu_rate
 
 # Корень проекта
 DIR_PATH = str(pathlib.Path(__file__).parent)
@@ -114,7 +115,8 @@ async def get_car_data(url: str) -> Car:
     for i in stats:
         # parse first registration
         if any(x in i.text for x in ['Первая регистрация', 'Erstzulassung', 'First Registration']):
-            car['age'] = _validate_age(list(i.children)[1].text)
+            car['age'] = list(i.children)[1].text.strip()
+            car['age_formatted'] = _validate_age(list(i.children)[1].text)
         # parse engine type
         if any(x in i.text for x in ['Топливо', 'Kraftstoffart', 'Fuel']):
             car['engine'] = _validate_engine(list(i.children)[1].text)
@@ -138,10 +140,15 @@ async def get_car_data(url: str) -> Car:
     price = page.find(class_='price-and-financing-row')
     # ger/eng version of the site
     if price:
-        car['price'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
-        car['price_with_vat'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
+        car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
+        car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
     else:
         # for rus version of the site
-        car['price_with_vat'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[0])
-        car['price'] = round(int(car['price_with_vat']) * 100 / 119)
+        car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[0])
+        car['price_eu'] = round(int(car['price_with_vat_eu']) * 100 / 119)
+
+    # calculate price in rubles
+    car['price_with_vat_ru'] = round(int(car['price_with_vat_eu']) * await get_current_eu_rate())
+    car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+
     return Car.parse_obj(car)

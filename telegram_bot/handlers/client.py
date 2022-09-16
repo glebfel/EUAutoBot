@@ -5,12 +5,31 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from telegram_bot.init_bot import dp
 from telegram_bot.inline_keyboard import start_markup, error_markup
-from parser import get_car_data, calculate_customs
+from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
 
 
 class FSM(StatesGroup):
     link = State()
+
+
+def format_bot_output(car: Car, customs: Customs) -> str:
+    output_text = text(bold(car.name),
+                       f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
+                       f"{bold('Год постановки на учет:')} {car.age}",
+                       f"{bold('Пробег:')} {car.mileage}",
+                       f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
+                       f"{bold('Стоимость авто: 💸')}",
+                       f"В Евро: €{car.price_eu:,} без НДС (€{car.price_with_vat_eu:,} с {car.vat}% НДС) НДС=€{car.price_with_vat_eu - car.price_eu:,}",
+                       f"В Рублях: ₽{car.price_ru:,} без НДС (₽{car.price_with_vat_ru:,} с {car.vat}% НДС) НДС=₽{car.price_with_vat_ru - car.price_ru:,}",
+                       f"\n{bold('Таможенное оформление в РФ:')}",
+                       f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}",
+                       f"{bold('Пошлина:')} ₽{customs.tax:,}",
+                       f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n",
+                       f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n",
+                       bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙'),
+                       sep="\n")
+    return output_text
 
 
 @dp.message_handler(commands=['start'])
@@ -57,7 +76,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
         car = await get_car_data(message.text)
         # calculate customs upon given car info
         customs = await calculate_customs(car)
-        await message.answer(str(customs))
+        await message.answer(format_bot_output(car, customs), parse_mode=ParseMode.MARKDOWN)
     except NotUrlError:
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   'Для того чтобы правильно передать ссылку:',

@@ -14,12 +14,12 @@ async def calculate_customs(car: Car) -> Customs:
     form_data = {
         "calculate": 1,
         "owner": car.owner,
-        "age": car.age,
+        "age": car.age_formatted,
         "engine": car.engine,
         "power": car.power,
         "power_unit": car.power_unit,
         "value": car.value,
-        "price": car.price,
+        "price": car.price_with_vat_eu,
         "currency": "eur",
     }
 
@@ -32,6 +32,11 @@ async def calculate_customs(car: Car) -> Customs:
     # clean data
     for i in calc_data:
         if i not in ['tax_k', 'util_k', 'increase_counter']:
-            calc_data[i] = calc_data[i].replace(',', '.').replace(' ', '')
+            calc_data[i] = calc_data[i].split(',')[0].replace(' ', '')
 
+    # получаем стоимость оформления СБКТС и ЭПТС из бд
+    calc_data["dop"] = 50000
+
+    # исправляем поле total
+    calc_data["total"] = int(calc_data["total"]) + calc_data["dop"]
     return Customs.parse_obj(calc_data)

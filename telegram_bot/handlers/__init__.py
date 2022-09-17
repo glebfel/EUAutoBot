@@ -1,1 +1,3 @@
 from telegram_bot.handlers.client import register_client_handlers
+from telegram_bot.handlers.admin import register_admin_handlers
+from telegram_bot.handlers.other import register_other_handlers

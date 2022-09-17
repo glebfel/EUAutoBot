@@ -159,17 +159,9 @@ async def process_link_input(message: types.Message, state: FSMContext):
         await state.finish()
 
 
-@dp.message_handler()
-async def process_other_commands(message: types.Message):
-    await message.answer(text("Не могу распознать введенную команду 🧐❗",
-                              "\nДля просмотра доступных команд воспользуйтесь /help 🧾"),
-                         parse_mode=ParseMode.MARKDOWN)
-
-
 def register_client_handlers(dp: Dispatcher):
-    dp.register_message_handler(process_start_command)
-    dp.register_message_handler(process_help_command)
+    dp.register_message_handler(process_start_command, commands=['start'])
+    dp.register_message_handler(process_help_command, commands=['help'])
     dp.register_callback_query_handler(process_calculate_button, state=None)
     dp.register_message_handler(process_link_input, state=FSM.link)
     dp.register_callback_query_handler(process_cancel_button, state="*")
-    dp.register_message_handler(process_other_commands)

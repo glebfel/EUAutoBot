@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 Rubbles = int
 Euros = int
@@ -23,8 +24,8 @@ class Car(BaseModel):
     value: int = Field(ge=0, description="engine capacity (in cubic centimeters)")
     mileage: Kilometers = Field(ge=0, default=0)
     damaged: bool = Field(description="if car was ever damaged or not", default=False)
-    price_eu: Euros
-    price_ru: Rubbles
+    price_eu: Optional[Euros]
+    price_ru: Optional[Rubbles]
     price_with_vat_eu: Euros
     price_with_vat_ru: Rubbles
     vat: int = Field(description="VAT tax value", default=19)

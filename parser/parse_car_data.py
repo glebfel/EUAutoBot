@@ -11,6 +11,7 @@ from parser.models import Car
 from bs4 import BeautifulSoup
 from arsenic import services, browsers, get_session
 from parser.get_exchange_rate import get_current_eu_rate
+from pydantic import ValidationError
 
 # Корень проекта
 DIR_PATH = str(pathlib.Path(__file__).parent)
@@ -78,85 +79,113 @@ def _validate_digit_value(digit_value: str) -> str:
 
 
 async def get_car_data(url: str) -> Car:
-    """Get info about the car by link (in https://calcus.ru/ format)"""
-    # validate link
-    _validate_link(url)
+    try:
+        """Get info about the car by link (in https://calcus.ru/ format)"""
+        # validate link
+        _validate_link(url)
 
-    # get page
-    service = services.Geckodriver(binary=GECKODRIVER)
-    browser = browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}})
-    async with get_session(service, browser) as session:
-        await session.get(url)
-        await session.wait_for_element(15, "li")
-        page = await session.get_page_source()
+        # get page
+        service = services.Geckodriver(binary=GECKODRIVER)
+        browser = browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}})
+        async with get_session(service, browser) as session:
+            await session.get(url)
+            await session.wait_for_element(15, "li")
+            page = await session.get_page_source()
 
-    # parse page
-    page = BeautifulSoup(page, 'lxml')
-    car = {}
-    # parse car name
-    name = page.find(class_='listing-title u-margin-bottom-18')
-    # ger/eng version of the site
-    if name:
-        car['name'] = name.h1.text + ' ' + name.div.text
-    else:
-        # for rus version of the site
-        car['name'] = page.find(class_='h2 g-col-8').text
-
-    # parse stats
-    # for ger/eng version
-    stats = page.find(class_='cBox cBox--content')
-    if stats:
-        stats = page.find(class_='cBox cBox--content').div
-        stats = list(stats.children)
-    else:
-        # for rus version
-        stats = []
-        stats.extend(page.find(class_='attributes-box g-col-12'))
-        stats.extend(page.find(class_='further-tec-data g-col-12'))
-
-    for i in stats:
-        # parse first registration
-        if any(x in i.text for x in ['Первая регистрация', 'Erstzulassung', 'First Registration']):
-            car['age'] = list(i.children)[1].text.strip()
-            car['age_formatted'] = _validate_age(list(i.children)[1].text)
-        # parse engine type
-        if any(x in i.text for x in ['Топливо', 'Kraftstoffart', 'Fuel']):
-            car['engine'] = _validate_engine(list(i.children)[1].text)
-        # parse engine power
-        if any(x in i.text for x in ['Мощность', 'Leistung', 'Power']):
-            car['power'] = list(i.children)[1].text.split()[2].replace("(", " ")
-        # parse engine capacity
-        if any(x in i.text for x in ['Объем двигателя', 'Hubraum', 'Cubic Capacity']):
-            car['value'] = _validate_digit_value(list(i.children)[1].text)
-        # parse mileage
-        if any(x in i.text for x in ['Пробег', 'Kilometerstand', 'Mileage']):
-            car['mileage'] = _validate_digit_value(list(i.children)[1].text)
-        # parse damages
-        if any(x in i.text for x in ['Состояние транспортного средства', 'Fahrzeugzustand', 'Vehicle condition']):
-            if any(x in i.text.split()[1] for x in ['Не попадало в ДТП', 'Unfallfrei', 'Accident-free']):
-                car['damaged'] = False
-            else:
-                car['damaged'] = True
-
-    # parse price
-    price = page.find(class_='price-and-financing-row')
-    # ger/eng version of the site
-    if price:
-        num_of_prices = len(page.find(class_='price-and-financing-row').text.split('€'))
-        if num_of_prices > 2:
-            car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
-            car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
+        # parse page
+        page = BeautifulSoup(page, 'lxml')
+        car = {}
+        # parse car name
+        name = page.find(class_='listing-title u-margin-bottom-18')
+        # ger/eng version of the site
+        if name:
+            car['name'] = name.h1.text + ' ' + name.div.text
         else:
-            car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[0])
-            car['price_eu'] = round(int(car['price_with_vat_eu']) * 100 / 119)
+            # for rus version of the site
+            car['name'] = page.find(class_='h2 g-col-8').text
 
-    else:
+        # parse stats
+        # for ger/eng version
+        stats = page.find(class_='cBox cBox--content')
+        if stats:
+            stats = page.find(class_='cBox cBox--content').div
+            stats = list(stats.children)
+        else:
+            # for rus version
+            stats = []
+            stats.extend(page.find(class_='attributes-box g-col-12'))
+            stats.extend(page.find(class_='further-tec-data g-col-12'))
+
+        for i in stats:
+            # parse first registration
+            if any(x in i.text for x in ['Первая регистрация', 'Erstzulassung', 'First Registration']):
+                car['age'] = list(i.children)[1].text.strip()
+                car['age_formatted'] = _validate_age(list(i.children)[1].text)
+            # parse engine type
+            if any(x in i.text for x in ['Топливо', 'Kraftstoffart', 'Fuel']):
+                car['engine'] = _validate_engine(list(i.children)[1].text)
+            # parse engine power
+            if any(x in i.text for x in ['Мощность', 'Leistung', 'Power']):
+                car['power'] = list(i.children)[1].text.split()[2].replace("(", " ")
+            # parse engine capacity
+            if any(x in i.text for x in ['Объем двигателя', 'Hubraum', 'Cubic Capacity']):
+                car['value'] = _validate_digit_value(list(i.children)[1].text)
+            # parse mileage
+            if any(x in i.text for x in ['Пробег', 'Kilometerstand', 'Mileage']):
+                car['mileage'] = _validate_digit_value(list(i.children)[1].text)
+            # parse damages
+            if any(x in i.text for x in ['Состояние транспортного средства', 'Fahrzeugzustand', 'Vehicle condition']):
+                if any(x in i.text for x in ['Не попадало в ДТП', 'Unfallfrei', 'Accident-free']):
+                    car['damaged'] = False
+                else:
+                    car['damaged'] = True
+
+        # check if
+
+        # parse price
+        price = page.find(class_='price-and-financing-row')
+        # ger/eng version of the site
+        if price:
+            num_of_prices = len(page.find(class_='price-and-financing-row').text.split('€'))
+            if num_of_prices > 2:
+                car['price_with_vat_eu'] = _validate_digit_value(
+                    page.find(class_='price-and-financing-row').text.split('€')[0])
+                car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
+                # calculate without vat price in rubles
+                car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+            else:
+                car['price_with_vat_eu'] = _validate_digit_value(
+                    page.find(class_='price-and-financing-row').text.split('€')[0])
+
         # for rus version of the site
-        car['price_with_vat_eu'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[0])
-        car['price_eu'] = round(int(car['price_with_vat_eu']) * 100 / 119)
+        else:
+            num_of_prices = len(page.find(class_='header-price-box g-col-4').text.split('€'))
+            if num_of_prices > 2:
+                car['price_with_vat_eu'] = _validate_digit_value(
+                    page.find(class_='header-price-box g-col-4').text.split('€')[0])
+                car['price_eu'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[1])
+                # calculate without vat price in rubles
+                car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+            else:
+                car['price_with_vat_eu'] = _validate_digit_value(
+                    page.find(class_='header-price-box g-col-4').text.split('€')[0])
 
-    # calculate price in rubles
-    car['price_with_vat_ru'] = round(int(car['price_with_vat_eu']) * await get_current_eu_rate())
-    car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+        # calculate price in rubles
+        car['price_with_vat_ru'] = round(int(car['price_with_vat_eu']) * await get_current_eu_rate())
 
-    return Car.parse_obj(car)
+        return Car.parse_obj(car)
+    except ValidationError:
+        if 'value' not in car:
+            # try to parse value from name
+            value = car["name"].split()
+            for i in value:
+                if "." in i or "," in i:
+                    val = ""
+                    for _ in i:
+                        if _.isdigit() or _ in [",", "."]:
+                            val += _
+                    car["value"] = int(float(val) * 1000)
+                    return Car.parse_obj(car)
+        raise ValidationError()
+
+

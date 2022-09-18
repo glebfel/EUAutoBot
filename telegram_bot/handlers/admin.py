@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ParseMode, CallbackQuery
 from aiogram.utils.markdown import text
 
-from telegram_bot.keyboards import login_markup, authed_markup, change_params_markup, input_params_markup, save_params_markup
+from telegram_bot.keyboards import login_markup, authed_markup, change_params_markup, input_values_markup
 from telegram_bot.init_bot import dp
 from databases import get_password, update_password, update_param
 
@@ -53,9 +53,9 @@ async def process_password_input(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text='change_password', state=None)
 async def process_change_password_button(callback: CallbackQuery):
     await FSMChangePassword.password.set()
-    await callback.message.answer(text('Введите желаемый пароль 👇'),
+    await callback.message.answer(text('Введите желаемый пароль 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=login_markup)
+                                  reply_markup=input_values_markup)
 
 
 @dp.message_handler(state=FSMChangePassword.password)
@@ -63,7 +63,7 @@ async def process_password_input(message: types.Message, state: FSMContext):
     update_password(message.text)
     await message.answer(text('Новый пароль успешно сохранён 👏'),
                          parse_mode=ParseMode.MARKDOWN,
-                         reply_markup=login_markup)
+                         reply_markup=authed_markup)
     await state.finish()
 
 
@@ -78,9 +78,9 @@ async def process_change_params_button(callback: CallbackQuery):
 
 @dp.callback_query_handler(text='change_currency_div', state=FSMChangeParams.param)
 async def process_change_currency_div_button(callback: CallbackQuery, state=FSMContext):
-    await callback.message.answer(text('Введите значение (доли вводить через точку, например: 23.4)'),
+    await callback.message.answer(text('Введите число 👇⌨ (доли вводить через точку, например: 23.4)'),
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=input_params_markup)
+                                  reply_markup=input_values_markup)
     async with state.proxy() as data:
         data['param'] = 'currency_div'
     await FSMChangeParams.next()
@@ -88,9 +88,9 @@ async def process_change_currency_div_button(callback: CallbackQuery, state=FSMC
 
 @dp.callback_query_handler(text='change_dop', state=FSMChangeParams.param)
 async def process_change_change_dop_button(callback: CallbackQuery, state=FSMContext):
-    await callback.message.answer(text('Введите значение (доли вводить через точку, например: 23.4)'),
+    await callback.message.answer(text('Введите число 👇⌨ (доли вводить через точку, например: 23.4)'),
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=input_params_markup)
+                                  reply_markup=input_values_markup)
     async with state.proxy() as data:
         data['param'] = 'dop'
     await FSMChangeParams.next()
@@ -102,17 +102,17 @@ async def process_param_value(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             value = float(message.text)
             update_param(data['param'], value)
-            await message.answer(text('Значение сохранено'),
+            await message.answer(text('Значение сохранено ✅'),
                                  parse_mode=ParseMode.MARKDOWN,
-                                 reply_markup=save_params_markup)
+                                 reply_markup=authed_markup)
         await state.finish()
     except (TypeError, ValueError):
-        await message.answer(text('Вы ввели некорректное значение',
+        await message.answer(text('Вы ввели некорректное значение 🛑',
                                   'Требуется ввести число (доли вводить через точку, например: 23.4)',
                                   'Повторите попытку 🔄',
                                   sep="\n"),
                              parse_mode=ParseMode.MARKDOWN,
-                             reply_markup=input_params_markup)
+                             reply_markup=input_values_markup)
 
 
 @dp.callback_query_handler(text='return', state="*")
@@ -130,7 +130,7 @@ async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text='exit_admin', state="*")
 async def process_exit_button(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(text("Выполните команду /start чтобы вернуться к началу"))
+    await callback.message.answer(text("Выполните команду /start чтобы вернуться к началу 🔙"))
     await callback.answer()
     current_state = await state.get_state()
     if current_state is None:

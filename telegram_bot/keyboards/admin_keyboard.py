@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 # markup for login
-exit_btn = InlineKeyboardButton('Выйти из режима модератора', callback_data='exit_admin')
+exit_btn = InlineKeyboardButton('Выйти из режима модератора 🔚', callback_data='exit_admin')
 login_markup = InlineKeyboardMarkup().add(exit_btn)
 
 # markup for authorized user
@@ -13,12 +13,8 @@ authed_markup = InlineKeyboardMarkup().add(change_password_btn).add(change_param
 # markup for change params
 change_currency_div_btn = InlineKeyboardButton('Изменить процент разницы курса €', callback_data='change_currency_div')
 change_dop_btn = InlineKeyboardButton('Изменить стоимость оформление СБКТС и ЭПТС', callback_data='change_dop')
-cancel_btn = InlineKeyboardButton('Отмена', callback_data='cancel_admin')
+cancel_btn = InlineKeyboardButton('Отмена ⛔', callback_data='cancel_admin')
 change_params_markup = InlineKeyboardMarkup(row_width=2).add(change_currency_div_btn, change_dop_btn).add(cancel_btn)
 
 # markup for input params process
-input_params_markup = InlineKeyboardMarkup().add(cancel_btn)
-
-# markup for save params process
-return_btn = InlineKeyboardButton('Вернуться', callback_data='return')
-save_params_markup = InlineKeyboardMarkup().add(return_btn)
+input_values_markup = InlineKeyboardMarkup().add(cancel_btn)

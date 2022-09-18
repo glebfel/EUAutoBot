@@ -1,6 +1,7 @@
 import json
 
 import aiohttp
+from databases import get_param_value
 
 BASE_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
 
@@ -10,9 +11,12 @@ BASIC_HEADER = {"Accept": "*/*",
 
 async def get_current_eu_rate() -> float:
     """Get current EUR/RUB currency exchange rate of """
-    # get calculations
+    # get CB official exchange rate
     session = aiohttp.ClientSession(headers=BASIC_HEADER)
     async with session.get(BASE_URL) as resp:
         rates = json.loads((await resp.text()))
         await session.close()
-    return rates["Valute"]["EUR"]["Value"]
+    off_rate = rates["Valute"]["EUR"]["Value"]
+    # calculate real exchange rate
+    real_rate = off_rate * (get_param_value('currency_div') / 100 + 1)
+    return real_rate

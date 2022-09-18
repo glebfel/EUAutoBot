@@ -9,7 +9,7 @@ from loguru import logger
 from pydantic import ValidationError
 
 from telegram_bot.init_bot import dp
-from telegram_bot.inline_keyboard import start_markup, error_markup, car_info_markup
+from telegram_bot.keyboards import start_markup, error_markup, car_info_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
 from parser import get_current_eu_rate

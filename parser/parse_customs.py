@@ -1,6 +1,7 @@
 import json
 import aiohttp
 from parser.models import Car, Customs
+from databases import get_param_value
 
 BASE_URL = "https://calcus.ru/rastamozhka-auto"
 
@@ -35,7 +36,7 @@ async def calculate_customs(car: Car) -> Customs:
             calc_data[i] = calc_data[i].split(',')[0].replace(' ', '')
 
     # получаем стоимость оформления СБКТС и ЭПТС из бд
-    calc_data["dop"] = 50000
+    calc_data["dop"] = int(get_param_value('dop'))
 
     # исправляем поле total
     calc_data["total"] = int(calc_data["total"]) + calc_data["dop"]

@@ -13,8 +13,9 @@ authed_markup = InlineKeyboardMarkup().add(change_password_btn).add(change_param
 # markup for change params
 change_currency_div_btn = InlineKeyboardButton('Изменить процент разницы курса €', callback_data='change_currency_div')
 change_dop_btn = InlineKeyboardButton('Изменить стоимость оформление СБКТС и ЭПТС', callback_data='change_dop')
-cancel_btn = InlineKeyboardButton('Отмена ⛔', callback_data='cancel_admin')
-change_params_markup = InlineKeyboardMarkup(row_width=2).add(change_currency_div_btn, change_dop_btn).add(cancel_btn)
+return_btn = InlineKeyboardButton('Вернуться 🔙', callback_data='return')
+change_params_markup = InlineKeyboardMarkup(row_width=2).add(change_currency_div_btn, change_dop_btn).add(return_btn)
 
 # markup for input params process
+cancel_btn = InlineKeyboardButton('Отмена ⛔', callback_data='cancel_admin')
 input_values_markup = InlineKeyboardMarkup().add(cancel_btn)

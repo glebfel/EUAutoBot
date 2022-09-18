@@ -2,11 +2,12 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ParseMode, CallbackQuery
-from aiogram.utils.markdown import text
+from aiogram.utils.markdown import text, bold
 
-from telegram_bot.keyboards import login_markup, authed_markup, change_params_markup, input_values_markup
+from telegram_bot.keyboards import login_markup, authed_markup, \
+    change_params_markup, input_values_markup, show_stats_markup
 from telegram_bot.init_bot import dp
-from databases import get_password, update_password, update_param
+from databases import get_password, update_password, update_param, get_param_value
 
 
 class FSMLogin(StatesGroup):
@@ -27,7 +28,7 @@ async def process_moderate_command(message: types.Message):
     await FSMLogin.password.set()
     await message.answer(text('Приветствую Вас 👋',
                               f'Вы зашли в режим модератора 📝',
-                              f'\nЧтобы продолжить наберите пароль 🗝 для доступа к админ-панели',
+                              f'\nЧтобы продолжить наберите пароль 🔑 для доступа к админ-панели',
                               sep="\n"),
                          parse_mode=ParseMode.MARKDOWN,
                          reply_markup=login_markup)
@@ -36,7 +37,7 @@ async def process_moderate_command(message: types.Message):
 @dp.message_handler(state=FSMLogin.password)
 async def process_password_input(message: types.Message, state: FSMContext):
     if message.text == get_password():
-        await message.answer(text('Вы успешно авторизованы 🚪',
+        await message.answer(text('Вы успешно авторизованы 🔓',
                                   'Выберите Ваши дальнейшие действия с помощью кнопок снизу 👇',
                                   sep="\n\n"),
                              parse_mode=ParseMode.MARKDOWN,
@@ -66,6 +67,19 @@ async def process_password_input(message: types.Message, state: FSMContext):
                          parse_mode=ParseMode.MARKDOWN,
                          reply_markup=authed_markup)
     await state.finish()
+
+
+@dp.callback_query_handler(text='show_params')
+async def process_show_params_button(callback: CallbackQuery):
+    currency_div = get_param_value('currency_div')
+    dop = get_param_value('dop')
+    await callback.message.answer(text(f'{bold("Стоимость оформление СБКТС и ЭПТС")}: {int(dop)}₽',
+                                       f'{bold("Процент разницы курса ЦБ и обменников")}: {currency_div}%',
+                                       sep="\n"
+                                       ),
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=show_stats_markup)
+    await callback.answer()
 
 
 @dp.callback_query_handler(text='change_params', state=None)

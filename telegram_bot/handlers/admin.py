@@ -26,8 +26,8 @@ class FSMChangeParams(StatesGroup):
 async def process_moderate_command(message: types.Message):
     await FSMLogin.password.set()
     await message.answer(text('Приветствую Вас 👋',
-                              f'Вы зашли в режим модератора 🤓',
-                              f'Чтобы продолжить наберите секретный ключ для доступа к админ-панели 🗝',
+                              f'Вы зашли в режим модератора 📝',
+                              f'\nЧтобы продолжить наберите пароль 🗝 для доступа к админ-панели',
                               sep="\n"),
                          parse_mode=ParseMode.MARKDOWN,
                          reply_markup=login_markup)
@@ -36,14 +36,14 @@ async def process_moderate_command(message: types.Message):
 @dp.message_handler(state=FSMLogin.password)
 async def process_password_input(message: types.Message, state: FSMContext):
     if message.text == get_password():
-        await message.answer(text('Вы успешно авторизованы 🎉',
+        await message.answer(text('Вы успешно авторизованы 🚪',
                                   'Выберите Ваши дальнейшие действия с помощью кнопок снизу 👇',
-                                  sep="\n"),
+                                  sep="\n\n"),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=authed_markup)
         await state.finish()
     else:
-        await message.answer(text('Введён неверный секретный ключ 📛',
+        await message.answer(text('📛 Введён неверный пароль 📛',
                                   'Повторите попытку 🔄',
                                   sep="\n"),
                              parse_mode=ParseMode.MARKDOWN,
@@ -56,6 +56,7 @@ async def process_change_password_button(callback: CallbackQuery):
     await callback.message.answer(text('Введите желаемый пароль 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
+    await callback.answer()
 
 
 @dp.message_handler(state=FSMChangePassword.password)
@@ -74,13 +75,17 @@ async def process_change_params_button(callback: CallbackQuery):
                                        'ниже 👇'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=change_params_markup)
+    await callback.answer()
 
 
 @dp.callback_query_handler(text='change_currency_div', state=FSMChangeParams.param)
 async def process_change_currency_div_button(callback: CallbackQuery, state=FSMContext):
-    await callback.message.answer(text('Введите число 👇⌨ (доли вводить через точку, например: 23.4)'),
+    await callback.message.answer(text('Введите число 👇⌨',
+                                       '(доли вводить через точку, например: 23.4)',
+                                       sep="\n"),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
+    await callback.answer()
     async with state.proxy() as data:
         data['param'] = 'currency_div'
     await FSMChangeParams.next()
@@ -91,6 +96,7 @@ async def process_change_change_dop_button(callback: CallbackQuery, state=FSMCon
     await callback.message.answer(text('Введите число 👇⌨ (доли вводить через точку, например: 23.4)'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
+    await callback.answer()
     async with state.proxy() as data:
         data['param'] = 'dop'
     await FSMChangeParams.next()
@@ -107,7 +113,7 @@ async def process_param_value(message: types.Message, state: FSMContext):
                                  reply_markup=authed_markup)
         await state.finish()
     except (TypeError, ValueError):
-        await message.answer(text('Вы ввели некорректное значение 🛑',
+        await message.answer(text('🛑 Вы ввели некорректное значение 🛑',
                                   'Требуется ввести число (доли вводить через точку, например: 23.4)',
                                   'Повторите попытку 🔄',
                                   sep="\n"),

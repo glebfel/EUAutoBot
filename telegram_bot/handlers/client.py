@@ -9,10 +9,10 @@ from loguru import logger
 from pydantic import ValidationError
 
 from telegram_bot.init_bot import dp
-from telegram_bot.keyboards import start_markup, error_markup, car_info_markup
+from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
-from parser import get_current_eu_rate
+from parser import get_real_eu_rate, get_cbr_eu_rate
 
 
 class FSM(StatesGroup):
@@ -35,37 +35,39 @@ async def format_bot_output(car: Car, customs: Customs) -> str:
                            f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n",
                            f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n",
                            bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙\n'),
-                           f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_current_eu_rate()}₽",
+                           f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_cbr_eu_rate()}₽",
                            str(italic(
                                "*расчет стоимости произведен с учетом курса ЦБ на день запроса +12% (курс обменников). "
                                "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
                                "возможных дополнительных платежей.")).replace("\\", ""),
                            sep="\n")
     else:
-        output_text = text(str(bold(car.name).replace("\\", "")),
-                           f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
-                           f"{bold('Дата постановки на учет:')} {car.age}",
-                           f"{bold('Пробег:')} {car.mileage} км",
-                           f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
-                           f"{bold('Стоимость авто: 💸')}",
-                           f"В Евро: €{car.price_with_vat_eu:,}",
-                           f"В Рублях: ₽{car.price_with_vat_ru:,}",
-                           str(italic(
-                               "*Машина продается без возможности возврата НДС. Такая покупка не всегда выгодна. "
-                               "Рекомендуем искать автомобиль с возможностью возврата НДС. Как правило продавцы таких "
-                               "автомобилей - автосалоны.")).replace("\\", ""),
-                           f"\n{bold('Таможенное оформление в РФ:')}",
-                           f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}",
-                           f"{bold('Пошлина:')} ₽{customs.tax:,}",
-                           f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n",
-                           f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n",
-                           bold(f'Итого: ₽{car.price_with_vat_ru + customs.total:,} 🚙\n'),
-                           f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_current_eu_rate()}₽",
-                           str(italic(
-                               "*расчет стоимости произведен с учетом курса ЦБ на день запроса +12% (курс обменников). "
-                               "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
-                               "возможных дополнительных платежей.")).replace("\\", ""),
-                           sep="\n")
+        output_text = text(
+            f"❗{bold('Машина продается без возможности возврата НДС')}❗",
+            str(italic(
+                "*Такая покупка не всегда выгодна. "
+                "Рекомендуем искать автомобиль с возможностью возврата НДС. Как правило продавцы таких "
+                "автомобилей - автосалоны.\n")).replace("\\", ""),
+            str(bold(car.name).replace("\\", "")),
+            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
+            f"{bold('Дата постановки на учет:')} {car.age}",
+            f"{bold('Пробег:')} {car.mileage} км",
+            f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
+            f"{bold('Стоимость авто: 💸')}",
+            f"В Евро: €{car.price_with_vat_eu:,}",
+            f"В Рублях: ₽{car.price_with_vat_ru:,}",
+            f"\n{bold('Таможенное оформление в РФ:')}",
+            f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}",
+            f"{bold('Пошлина:')} ₽{customs.tax:,}",
+            f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n",
+            f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n",
+            bold(f'Итого: ₽{car.price_with_vat_ru + customs.total:,} 🚙\n'),
+            f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_cbr_eu_rate()}₽",
+            str(italic(
+                "*расчет стоимости произведен с учетом курса ЦБ на день запроса +12% (курс обменников). "
+                "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
+                "возможных дополнительных платежей.")).replace("\\", ""),
+            sep="\n")
     return output_text
 
 
@@ -157,6 +159,12 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"))
     finally:
         await state.finish()
+
+
+@dp.callback_query_handler(text='call')
+async def process_call_button(callback: CallbackQuery):
+    await callback.message.answer(text("+74993894054"), reply_markup=get_phone_markup)
+    await callback.answer()
 
 
 def register_client_handlers(dp: Dispatcher):

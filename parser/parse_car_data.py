@@ -10,7 +10,7 @@ import exceptions
 from parser.models import Car
 from bs4 import BeautifulSoup
 from arsenic import services, browsers, get_session
-from parser.get_exchange_rate import get_current_eu_rate
+from parser.get_exchange_rate import get_real_eu_rate
 from pydantic import ValidationError
 
 # Корень проекта
@@ -152,7 +152,7 @@ async def get_car_data(url: str) -> Car:
                     page.find(class_='price-and-financing-row').text.split('€')[0])
                 car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
                 # calculate without vat price in rubles
-                car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+                car['price_ru'] = round(int(car['price_eu']) * await get_real_eu_rate())
             else:
                 car['price_with_vat_eu'] = _validate_digit_value(
                     page.find(class_='price-and-financing-row').text.split('€')[0])
@@ -165,13 +165,13 @@ async def get_car_data(url: str) -> Car:
                     page.find(class_='header-price-box g-col-4').text.split('€')[0])
                 car['price_eu'] = _validate_digit_value(page.find(class_='header-price-box g-col-4').text.split('€')[1])
                 # calculate without vat price in rubles
-                car['price_ru'] = round(int(car['price_eu']) * await get_current_eu_rate())
+                car['price_ru'] = round(int(car['price_eu']) * await get_real_eu_rate())
             else:
                 car['price_with_vat_eu'] = _validate_digit_value(
                     page.find(class_='header-price-box g-col-4').text.split('€')[0])
 
         # calculate price in rubles
-        car['price_with_vat_ru'] = round(int(car['price_with_vat_eu']) * await get_current_eu_rate())
+        car['price_with_vat_ru'] = round(int(car['price_with_vat_eu']) * await get_real_eu_rate())
 
         return Car.parse_obj(car)
     except ValidationError:

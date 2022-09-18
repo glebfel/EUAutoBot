@@ -18,3 +18,5 @@ get_more_info_btn = InlineKeyboardButton('Узнать стоимость офо
 car_info_markup = InlineKeyboardMarkup(row_width=2).add(call_btn, message_btn).add(get_more_info_btn).add(
     another_car_btn)
 
+# markup for get phone
+get_phone_markup = InlineKeyboardMarkup().add(another_car_btn)

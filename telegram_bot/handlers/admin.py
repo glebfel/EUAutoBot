@@ -10,7 +10,7 @@ from aiogram.utils.markdown import text, bold, italic
 from telegram_bot.keyboards import (login_markup, authed_markup,
                                     change_params_markup, input_values_markup, show_params_markup, show_stats_markup)
 from telegram_bot.init_bot import dp
-from databases import (get_password, update_password, update_param, get_param_value,
+from databases import (check_password, update_password, update_param, get_param_value,
                        get_number_of_unique_users, get_car_calculation_count_overall, get_feedback_usage_count_overall,
                        get_start_command_usage_overall, add_user, update_user_last_auth, check_user)
 from telegram_bot.generate_csv_from_stats import create_csv
@@ -56,7 +56,7 @@ async def process_moderate_command(message: types.Message):
 
 @dp.message_handler(state=FSMLogin.password)
 async def process_password_input(message: types.Message, state: FSMContext):
-    if message.text == get_password():
+    if check_password(message.text):
         await message.answer(text('Вы успешно авторизованы 🔓',
                                   'Выберите Ваши дальнейшие действия с помощью кнопок снизу 👇',
                                   sep="\n\n"),

@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 
 from loguru import logger
-from sqlalchemy import Column, String, Integer, DATE, create_engine, FLOAT
+from sqlalchemy import Column, String, Integer, DATE, create_engine, FLOAT, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 DB_NAME = 'bot.db'
@@ -20,7 +20,8 @@ class IdMixin(object):
 
 class Password(Base, IdMixin):
     __tablename__ = 'password'
-    password = Column(String, unique=True, nullable=False)
+    pw_hash = Column(LargeBinary, unique=True, nullable=False)
+    salt = Column(LargeBinary, unique=True, nullable=False)
     last_update_date = Column(DATE, default=datetime.date.today())
 
 

@@ -1,27 +1,31 @@
 import datetime
 
+from databases.passwords_handler import hash_new_password, is_correct_password
 from databases.db_models import SessionLocal, Password
 
 
 def update_password(password: str):
-    current_password = get_password()
+    salt, pw_hash = hash_new_password(password)
     with SessionLocal() as session:
-        session.query(Password).filter_by(password=current_password).update({"password": password,
+        session.query(Password).filter(Password.password is not None).update({"pw_hash": pw_hash,
+                                                                             "salt": salt,
                                                                              "last_update_date": datetime.date.today()})
         session.commit()
 
 
 def add_password(password: str):
     with SessionLocal() as session:
+        salt, pw_hash = hash_new_password(password)
         password = Password(
-            password=password,
+            pw_hash=pw_hash,
+            salt=salt,
             last_update_date=datetime.date.today()
         )
         session.add(password)
         session.commit()
 
 
-def get_password() -> str:
+def check_password(password: str) -> bool:
     with SessionLocal() as session:
-        password = session.query(Password).filter(Password.password is not None).first()
-        return password.password
+        pw_db = session.query(Password).filter(Password.password is not None).first()
+        return is_correct_password(pw_db.pw_hash, password, pw_db.salt)

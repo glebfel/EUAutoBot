@@ -26,4 +26,6 @@ class CarAttributeEmptyError(BasicBotException):
         self.attr = attr
 
     def __str__(self):
+        if not self.attr:
+            return ""
         return self.attr

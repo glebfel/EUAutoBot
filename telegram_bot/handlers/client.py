@@ -6,7 +6,6 @@ from aiogram.utils.markdown import text, italic, bold
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
-from pydantic import ValidationError
 
 from telegram_bot.init_bot import dp
 from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup
@@ -158,7 +157,9 @@ async def process_link_input(message: types.Message, state: FSMContext):
         logger.error(ex)
         await message.answer(text("Что-то пошло не так ... 🥴",
                                   "Повторите попытку позже 😔",
-                                  sep="\n\n"))
+                                  sep="\n\n"),
+                             reply_markup=error_markup
+                             )
     finally:
         await state.finish()
 

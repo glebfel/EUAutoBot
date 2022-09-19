@@ -186,6 +186,7 @@ async def get_car_data(url: str) -> Car:
                             val += _
                     car["value"] = int(float(val) * 1000)
                     return Car.parse_obj(car)
-        raise ValidationError()
+            raise exceptions.CarAttributeEmptyError("Объем двигателя")
+        raise exceptions.CarAttributeEmptyError()
 
 

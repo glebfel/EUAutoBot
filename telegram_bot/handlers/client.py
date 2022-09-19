@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from telegram_bot.init_bot import dp
 from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
-from exceptions import AnotherUrlError, NotUrlError
+from exceptions import AnotherUrlError, NotUrlError, CarAttributeEmptyError
 from parser import get_cbr_eu_rate
 from databases import update_start_command_count, update_car_calculation_count, update_feedback_usage_count
 
@@ -143,10 +143,12 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
-    except ValidationError as ex:
+    except CarAttributeEmptyError as ex:
+        logger.error(type(ex))
         logger.error(ex)
-        await message.answer(text('Похоже, что объявление которое Вы передали не содержит, всех нужных для расчетов, '
-                                  'параметров авто 🛑',
+        await message.answer(text(f'Похоже, что объявление которое Вы передали, не содержит параметра "{italic(ex)}" '
+                                  f'нужного '
+                                  f'для расчетов 🛑',
                                   'К сожалению, мы не можем рассчитать для него стоимость ... 😔',
                                   sep="\n\n"),
                              reply_markup=error_markup,

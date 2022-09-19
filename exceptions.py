@@ -19,3 +19,11 @@ class AnotherUrlError(BasicBotException):
 
     def __str__(self):
         return f"{self.url} is url of the another web page!"
+
+
+class CarAttributeEmptyError(BasicBotException):
+    def __init__(self, attr: str = None):
+        self.attr = attr
+
+    def __str__(self):
+        return self.attr

@@ -12,7 +12,7 @@ from telegram_bot.init_bot import dp
 from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
-from parser import get_real_eu_rate, get_cbr_eu_rate
+from parser import get_cbr_eu_rate
 
 
 class FSM(StatesGroup):
@@ -112,6 +112,8 @@ async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
 async def process_link_input(message: types.Message, state: FSMContext):
     try:
         await message.answer(text('Выполняю запрос ⏳'))
+
+        logger.info(f'Processing "{message.text}" request ...')
         # get info about the car from https://www.mobile.de/
         car = await get_car_data(message.text)
         # calculate customs upon given car info
@@ -119,7 +121,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
         await message.answer(await format_bot_output(car, customs),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=car_info_markup)
-    except NotUrlError:
+    except NotUrlError as ex:
+        logger.error(ex)
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
@@ -127,7 +130,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
-    except AnotherUrlError:
+    except AnotherUrlError as ex:
+        logger.error(ex)
         await message.answer(text('Похоже Вы передали ссылку на другой сайт 🤔',
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
@@ -135,7 +139,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
-    except AttributeError:
+    except AttributeError as ex:
+        logger.error(ex)
         await message.answer(text('Похоже Вы передали ссылку на страницу сайта mobile.de не содержащую данных об авто '
                                   '🤔',
                                   'Для того чтобы правильно передать ссылку:',
@@ -144,16 +149,17 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
-    except ValidationError:
+    except ValidationError as ex:
+        logger.error(ex)
         await message.answer(text('Похоже, что объявление которое Вы передали не содержит, всех нужных для расчетов, '
                                   'параметров авто 🛑',
                                   'К сожалению, мы не можем рассчитать для него стоимость ... 😔',
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
-    except Exception as e:
-        logger.warning(type(e))
-        logger.warning(e)
+    except Exception as ex:
+        logger.error(type(ex))
+        logger.error(ex)
         await message.answer(text("Что-то пошло не так ... 🥴",
                                   "Повторите попытку позже 😔",
                                   sep="\n\n"))

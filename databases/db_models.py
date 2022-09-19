@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from loguru import logger
 from sqlalchemy import Column, String, Integer, DATE, create_engine, FLOAT
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -31,3 +32,4 @@ class Params(Base, IdMixin):
 def create_database():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    logger.info('DB was successfully initialized!')

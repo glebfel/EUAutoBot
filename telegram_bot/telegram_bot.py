@@ -8,6 +8,11 @@ from databases import create_database, add_password, add_param
 
 async def on_startup(_):
     logger.info('Bot successfully get online!')
+    # register all handlers
+    register_admin_handlers(dp)
+    register_client_handlers(dp)
+    register_other_handlers(dp)
+    # init and fill db
     create_database()
     add_password('123321')
     add_param('currency_div', 12)
@@ -20,7 +25,4 @@ async def shutdown(dp: Dispatcher):
 
 
 def run():
-    register_admin_handlers(dp)
-    register_client_handlers(dp)
-    register_other_handlers(dp)
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=shutdown)

@@ -1,7 +1,7 @@
 import pathlib
 from pydantic import BaseSettings
 
-# Корень проекта
+# current directory
 DIR_PATH = str(pathlib.Path(__file__).parent)
 
 

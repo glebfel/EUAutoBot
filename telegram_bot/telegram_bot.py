@@ -9,8 +9,8 @@ from databases import create_database, add_password, add_param
 async def on_startup(_):
     await bot.delete_webhook(drop_pending_updates=True)
     # register all handlers
-    register_admin_handlers(dp)
     register_client_handlers(dp)
+    register_admin_handlers(dp)
     register_other_handlers(dp)
     # init and fill db
     create_database()

@@ -1,13 +1,22 @@
+import datetime
+import pathlib
+
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ParseMode, CallbackQuery
-from aiogram.utils.markdown import text, bold
+from aiogram.utils.markdown import text, bold, italic
 
-from telegram_bot.keyboards import login_markup, authed_markup, \
-    change_params_markup, input_values_markup, show_stats_markup
+from telegram_bot.keyboards import (login_markup, authed_markup,
+                                    change_params_markup, input_values_markup, show_params_markup, show_stats_markup)
 from telegram_bot.init_bot import dp
-from databases import get_password, update_password, update_param, get_param_value
+from databases import (get_password, update_password, update_param, get_param_value,
+                       get_number_of_unique_users, get_car_calculation_count_overall, get_feedback_usage_count_overall,
+                       get_start_command_usage_overall)
+from telegram_bot.generate_csv_from_stats import create_csv
+
+# csv file directory
+DIR_PATH = str(pathlib.Path(__file__).parent.parent)
 
 
 class FSMLogin(StatesGroup):
@@ -78,7 +87,7 @@ async def process_show_params_button(callback: CallbackQuery):
                                        sep="\n"
                                        ),
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=show_stats_markup)
+                                  reply_markup=show_params_markup)
     await callback.answer()
 
 
@@ -137,10 +146,41 @@ async def process_param_value(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='get_stats')
 async def process_get_stats_button(callback: CallbackQuery):
-    await callback.message.answer(text(bold('Статистика использования бота'),
+    # create csv file
+    create_csv()
+    # make formatted output
+    count_overall_usage = get_start_command_usage_overall()
+    count_today_usage = get_start_command_usage_overall(from_timespan=datetime.date.today())
+    count_unique_users_overall = get_number_of_unique_users()
+    count_unique_users_today = get_number_of_unique_users(from_timespan=datetime.date.today())
+    count_car_calculation_overall = get_car_calculation_count_overall()
+    count_car_calculation_today = get_car_calculation_count_overall(from_timespan=datetime.date.today())
+    count_feedback_request_overall = get_feedback_usage_count_overall()
+    count_feedback_request_today = get_feedback_usage_count_overall(from_timespan=datetime.date.today())
+    await callback.message.answer(text(bold('Статистика использования бота 📊'),
+                                       bold("\nЗа сегодня:"),
+                                       f"{italic('Количество использований бота:')} {count_today_usage}",
+                                       f"{italic('Количество уникальных пользователей:')} {count_unique_users_today}",
+                                       f"{italic('Количество проведённых расчётов стоимости авто:')} {count_car_calculation_today}",
+                                       str(italic(
+                                           f'Количество запросов на получение обратной связи (звонки): {count_feedback_request_today}')).replace(
+                                           '\\', ''),
+                                       bold("\nЗа всё время:"),
+                                       f"{italic('Количество использований бота:')} {count_overall_usage}",
+                                       f"{italic('Количество уникальных пользователей:')} {count_unique_users_overall}",
+                                       f"{italic('Количество проведённых расчётов стоимости авто:')} {count_car_calculation_overall}",
+                                       str(italic(
+                                           f'Количество запросов на получение обратной связи (звонки): {count_feedback_request_overall}')).replace(
+                                           '\\', ''),
                                        sep='\n'),
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=authed_markup)
+                                  reply_markup=show_stats_markup)
+    await callback.answer()
+
+
+@dp.callback_query_handler(text='get_csv')
+async def process_download_csv_button(callback: CallbackQuery):
+    await callback.message.reply_document(open(DIR_PATH + '/stats.csv', 'rb'), reply_markup=show_params_markup)
     await callback.answer()
 
 

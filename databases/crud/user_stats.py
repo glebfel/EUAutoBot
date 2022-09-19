@@ -58,39 +58,54 @@ def update_feedback_usage_count(user_id: int):
         session.commit()
 
 
-def get_number_of_unique_users(timespan: datetime.date = None):
+def get_number_of_unique_users(from_timespan: datetime.date = None) -> int:
     with SessionLocal() as session:
-        if timespan:
-            users = session.query(UserStats).filter_by(UserStats.last_usage_date < datetime.date).all()
+        if from_timespan:
+            users = session.query(UserStats).filter(UserStats.last_usage_date >= from_timespan).all()
         else:
             users = session.query(UserStats).all()
         return len(users)
 
 
-def get_start_command_usage_overall(timespan: datetime.date = None):
+def get_start_command_usage_overall(from_timespan: datetime.date = None) -> int:
     with SessionLocal() as session:
-        if timespan:
-            count = session.query(func.sum(UserStats.start_command_count).filter_by(UserStats.last_usage_date < datetime.date))
-        else:
-            count = session.query(func.sum(UserStats.start_command_count))
-        return count
-
-
-def get_car_calculation_count_overall(timespan: datetime.date = None):
-    with SessionLocal() as session:
-        if timespan:
+        if from_timespan:
             count = session.query(
-                func.sum(UserStats.car_calculation_count).filter_by(UserStats.last_usage_date < datetime.date))
+                func.sum(UserStats.start_command_count).filter(UserStats.last_usage_date >= from_timespan)).first()
         else:
-            count = session.query(func.sum(UserStats.car_calculation_count))
-        return count
+            count = session.query(func.sum(UserStats.start_command_count)).first()
+        return count[0]
 
 
-def get_feedback_usage_count_overall(timespan: datetime.date = None):
+def get_car_calculation_count_overall(from_timespan: datetime.date = None) -> int:
     with SessionLocal() as session:
-        if timespan:
+        if from_timespan:
             count = session.query(
-                func.sum(UserStats.feedback_usage_count).filter_by(UserStats.last_usage_date < datetime.date))
+                func.sum(UserStats.car_calculation_count).filter(UserStats.last_usage_date >= from_timespan)).first()
         else:
-            count = session.query(func.sum(UserStats.feedback_usage_count))
-        return count
+            count = session.query(func.sum(UserStats.car_calculation_count)).first()
+        return count[0]
+
+
+def get_feedback_usage_count_overall(from_timespan: datetime.date = None) -> int:
+    with SessionLocal() as session:
+        if from_timespan:
+            count = session.query(
+                func.sum(UserStats.feedback_usage_count).filter(UserStats.last_usage_date >= from_timespan)).first()
+        else:
+            count = session.query(func.sum(UserStats.feedback_usage_count)).first()
+        return count[0]
+
+
+def get_all_users_stats() -> list[dict]:
+    with SessionLocal() as session:
+        users = session.query(UserStats).all()
+    # convert to list of dicts
+    users_list = []
+    for _ in users:
+        users_list.append({'ID пользователя': _.user_id,
+                           'Количество использований бота': _.start_command_count,
+                           'Количество запросов на проведение расчета стоимости авто': _.car_calculation_count,
+                           'Количество запросов на получение обратной связи (звонки)': _.feedback_usage_count,
+                           'Дата последнего использования': _.last_usage_date})
+    return users_list

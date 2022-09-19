@@ -102,15 +102,6 @@ async def process_calculate_button(callback: CallbackQuery):
     update_car_calculation_count(callback.from_user.id)
 
 
-@dp.callback_query_handler(text='cancel', state="*")
-async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(text("Благодарим Вас за использование нашего бота 😊",
-                                       "Выполните команду /start чтобы вернуться к началу ⬆",
-                                       sep="\n\n"))
-    await callback.answer()
-    await state.finish()
-
-
 @dp.message_handler(state=FSM.link)
 async def process_link_input(message: types.Message, state: FSMContext):
     try:
@@ -175,6 +166,18 @@ async def process_call_button(callback: CallbackQuery):
     await callback.message.answer(text("+74993894054"), reply_markup=get_phone_markup)
     await callback.answer()
     update_feedback_usage_count(callback.from_user.id)
+
+
+@dp.callback_query_handler(text='cancel', state="*")
+async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer(text("Благодарим Вас за использование нашего бота 😊",
+                                       "Выполните команду /start чтобы вернуться к началу ⬆",
+                                       sep="\n\n"))
+    await callback.answer()
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
 
 
 def register_client_handlers(dp: Dispatcher):

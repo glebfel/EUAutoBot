@@ -13,6 +13,7 @@ from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, 
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError
 from parser import get_cbr_eu_rate
+from databases import update_start_command_count, update_car_calculation_count, update_feedback_usage_count
 
 
 class FSM(StatesGroup):
@@ -78,6 +79,7 @@ async def process_start_command(message: types.Message):
                               f'\n\nЧто бы начать, нажмите кнопку ниже 👇'),
                          reply_markup=start_markup,
                          parse_mode=ParseMode.MARKDOWN)
+    update_start_command_count(message.from_user.id)
 
 
 @dp.message_handler(commands=['help'])
@@ -97,6 +99,7 @@ async def process_calculate_button(callback: CallbackQuery):
     await FSM.link.set()
     await callback.message.answer("Пожалуйста, пришлите ссылку на интересуемое авто 🚙🔍")
     await callback.answer()
+    update_car_calculation_count(callback.from_user.id)
 
 
 @dp.callback_query_handler(text='cancel', state="*")
@@ -171,6 +174,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
 async def process_call_button(callback: CallbackQuery):
     await callback.message.answer(text("+74993894054"), reply_markup=get_phone_markup)
     await callback.answer()
+    update_feedback_usage_count(callback.from_user.id)
 
 
 def register_client_handlers(dp: Dispatcher):

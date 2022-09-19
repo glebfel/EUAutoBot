@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from loguru import logger
@@ -20,13 +21,22 @@ class IdMixin(object):
 class Password(Base, IdMixin):
     __tablename__ = 'password'
     password = Column(String, unique=True, nullable=False)
-    last_update_date = Column(DATE, nullable=False)
+    last_update_date = Column(DATE, default=datetime.date.today())
 
 
 class Params(Base, IdMixin):
     __tablename__ = 'params'
     param_name = Column(String, unique=True, nullable=False)
     value = Column(FLOAT, nullable=False)
+
+
+class UserStats(Base, IdMixin):
+    __tablename__ = 'user_stats'
+    user_id = Column(Integer, unique=True, nullable=False)
+    start_command_count = Column(Integer, default=1)
+    car_calculation_count = Column(Integer, default=0)
+    feedback_usage_count = Column(Integer, default=0)
+    last_usage_date = Column(DATE, default=datetime.date.today())
 
 
 def create_database():

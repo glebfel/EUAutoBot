@@ -135,6 +135,15 @@ async def process_param_value(message: types.Message, state: FSMContext):
                              reply_markup=input_values_markup)
 
 
+@dp.callback_query_handler(text='get_stats')
+async def process_get_stats_button(callback: CallbackQuery):
+    await callback.message.answer(text(bold('Статистика использования бота'),
+                                       sep='\n'),
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=authed_markup)
+    await callback.answer()
+
+
 @dp.callback_query_handler(text='return', state="*")
 @dp.callback_query_handler(text='cancel_admin', state="*")
 async def process_cancel_button(callback: CallbackQuery, state: FSMContext):

@@ -140,22 +140,27 @@ async def get_car_data(url: str) -> Car:
                 else:
                     car['damaged'] = True
 
-        # check if
-
         # parse price
         price = page.find(class_='price-and-financing-row')
+
         # ger/eng version of the site
         if price:
-            num_of_prices = len(page.find(class_='price-and-financing-row').text.split('€'))
-            if num_of_prices > 2:
+            # check for sales
+            sales = page.find(class_='h3 u-text-red u-own-line-through-red')
+            if sales:
                 car['price_with_vat_eu'] = _validate_digit_value(
-                    page.find(class_='price-and-financing-row').text.split('€')[0])
-                car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
-                # calculate without vat price in rubles
-                car['price_ru'] = round(int(car['price_eu']) * await get_real_eu_rate())
+                    page.find(class_='price-and-financing-row').text.split('€')[1])
             else:
-                car['price_with_vat_eu'] = _validate_digit_value(
-                    page.find(class_='price-and-financing-row').text.split('€')[0])
+                num_of_prices = len(page.find(class_='price-and-financing-row').text.split('€'))
+                if num_of_prices > 2:
+                    car['price_with_vat_eu'] = _validate_digit_value(
+                        page.find(class_='price-and-financing-row').text.split('€')[0])
+                    car['price_eu'] = _validate_digit_value(page.find(class_='price-and-financing-row').text.split('€')[1])
+                    # calculate without vat price in rubles
+                    car['price_ru'] = round(int(car['price_eu']) * await get_real_eu_rate())
+                else:
+                    car['price_with_vat_eu'] = _validate_digit_value(
+                        page.find(class_='price-and-financing-row').text.split('€')[0])
 
         # for rus version of the site
         else:

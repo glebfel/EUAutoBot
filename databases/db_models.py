@@ -24,6 +24,12 @@ class Password(Base, IdMixin):
     last_update_date = Column(DATE, default=datetime.date.today())
 
 
+class AuthedUsers(Base, IdMixin):
+    __tablename__ = 'authed_users'
+    user_id = Column(Integer, unique=True, nullable=False)
+    last_auth_date = Column(DATE, default=datetime.date.today())
+
+
 class Params(Base, IdMixin):
     __tablename__ = 'params'
     param_name = Column(String, unique=True, nullable=False)

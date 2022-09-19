@@ -12,7 +12,7 @@ from telegram_bot.keyboards import (login_markup, authed_markup,
 from telegram_bot.init_bot import dp
 from databases import (get_password, update_password, update_param, get_param_value,
                        get_number_of_unique_users, get_car_calculation_count_overall, get_feedback_usage_count_overall,
-                       get_start_command_usage_overall)
+                       get_start_command_usage_overall, add_user, update_user_last_auth, check_user)
 from telegram_bot.generate_csv_from_stats import create_csv
 
 # csv file directory
@@ -34,13 +34,24 @@ class FSMChangeParams(StatesGroup):
 
 @dp.message_handler(commands=['moderate'], state=None)
 async def process_moderate_command(message: types.Message):
-    await FSMLogin.password.set()
-    await message.answer(text('Приветствую Вас 👋',
-                              f'Вы зашли в режим модератора 📝',
-                              f'\nЧтобы продолжить наберите пароль 🔑 для доступа к админ-панели',
-                              sep="\n"),
-                         parse_mode=ParseMode.MARKDOWN,
-                         reply_markup=login_markup)
+    if check_user(message.from_user.id):
+        update_user_last_auth(message.from_user.id)
+        await message.answer(text('Приветствую Вас 👋',
+                                  f'Вы уже были ранее авторизованы 🔓',
+                                  '\nВыберите Ваши дальнейшие действия с помощью кнопок снизу 👇',
+                                  sep="\n"),
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=authed_markup
+                             )
+    else:
+        add_user(message.from_user.id)
+        await FSMLogin.password.set()
+        await message.answer(text('Приветствую Вас 👋',
+                                  f'Вы зашли в режим модератора 📝',
+                                  f'\nЧтобы продолжить наберите пароль 🔑 для доступа к админ-панели',
+                                  sep="\n"),
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=login_markup)
 
 
 @dp.message_handler(state=FSMLogin.password)

@@ -94,7 +94,7 @@ async def process_password_input(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='show_params')
 async def process_show_params_button(callback: CallbackQuery):
-    currency_div = get_param_value('currency_div')
+    currency_div = get_param_value('exchange_div')
     dop = get_param_value('dop')
     await callback.message.answer(text(f'{bold("Стоимость оформление СБКТС и ЭПТС")}: {dop}₽',
                                        f'{bold("Процент разницы курса ЦБ и обменников")}: {currency_div}%',
@@ -115,14 +115,14 @@ async def process_change_params_button(callback: CallbackQuery):
     await callback.answer()
 
 
-@dp.callback_query_handler(text='change_currency_div', state=FSMChangeParams.param)
+@dp.callback_query_handler(text='change_exchange_div', state=FSMChangeParams.param)
 async def process_change_currency_div_button(callback: CallbackQuery, state=FSMContext):
     await callback.message.answer(text('Введите число 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
     await callback.answer()
     async with state.proxy() as data:
-        data['param'] = 'currency_div'
+        data['param'] = 'exchange_div'
     await FSMChangeParams.next()
 
 

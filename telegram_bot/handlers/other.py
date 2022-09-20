@@ -3,6 +3,7 @@ from aiogram.types import ParseMode
 from aiogram.utils.markdown import text
 from telegram_bot.init_bot import dp
 
+
 @dp.message_handler()
 async def process_other_commands(message: types.Message):
     await message.answer(text("Не могу распознать введенную команду 🧐❗",

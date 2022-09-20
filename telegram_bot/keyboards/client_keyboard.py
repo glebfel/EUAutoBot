@@ -4,10 +4,6 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 start_btn = InlineKeyboardButton('Рассчитать стоимость 📈', callback_data='calculate')
 start_markup = InlineKeyboardMarkup().add(start_btn)
 
-# markup for errors
-retry_btn = InlineKeyboardButton('Повторить попытку 🔄', callback_data='retry')
-error_markup = InlineKeyboardMarkup().add(retry_btn)
-
 # markup for car info output
 call_btn = InlineKeyboardButton('Позвонить 📞', callback_data='call')
 message_btn = InlineKeyboardButton('Написать 📱', url='https://t.me/makarusan')
@@ -19,3 +15,10 @@ car_info_markup = InlineKeyboardMarkup(row_width=2).add(call_btn, message_btn).a
 
 # markup for get phone
 get_phone_markup = InlineKeyboardMarkup().add(another_car_btn)
+
+# markup for car error
+car_error_markup = InlineKeyboardMarkup().add(another_car_btn)
+
+# markup for basic errors
+retry_btn = InlineKeyboardButton('Повторить попытку 🔄', callback_data='retry')
+error_markup = InlineKeyboardMarkup().add(retry_btn)

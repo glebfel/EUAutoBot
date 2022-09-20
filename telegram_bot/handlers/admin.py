@@ -46,7 +46,6 @@ async def process_moderate_command(message: types.Message):
                              reply_markup=authed_markup
                              )
     else:
-        add_user(message.from_user.id)
         await FSMLogin.password.set()
         await message.answer(text('Приветствую Вас 👋',
                                   f'Вы зашли в режим модератора 📝',
@@ -59,6 +58,7 @@ async def process_moderate_command(message: types.Message):
 @dp.message_handler(state=FSMLogin.password)
 async def process_password_input(message: types.Message, state: FSMContext):
     if check_password(message.text):
+        add_user(message.from_user.id)
         await message.answer(text('Вы успешно авторизованы 🔓',
                                   'Выберите Ваши дальнейшие действия с помощью кнопок снизу 👇',
                                   sep="\n\n"),
@@ -116,7 +116,7 @@ async def process_change_params_button(callback: CallbackQuery):
 
 
 @dp.callback_query_handler(text='change_exchange_div', state=FSMChangeParams.param)
-async def process_change_currency_div_button(callback: CallbackQuery, state=FSMContext):
+async def process_change_exchange_div_button(callback: CallbackQuery, state=FSMContext):
     await callback.message.answer(text('Введите число 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
@@ -149,10 +149,10 @@ async def process_param_value(message: types.Message, state: FSMContext):
             logger.info(f'{data["param"]} param has been changed!')
         await state.finish()
     except (TypeError, ValueError):
-        await message.answer(text('🛑 Вы ввели некорректное значение 🛑',
-                                  'Требуется ввести число (доли вводить через точку, например: 23.4)',
+        await message.answer(text('🛑 Некорректное значение 🛑',
+                                  'Требуется ввести целочисленное значение (больше нуля)',
                                   'Повторите попытку 🔄',
-                                  sep="\n"),
+                                  sep="\n\n"),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=input_values_markup)
 
@@ -226,7 +226,7 @@ def register_admin_handlers(dp: Dispatcher):
     dp.callback_query_handler(process_change_password_button, state=None)
     dp.register_message_handler(process_password_input, state=FSMChangePassword.password)
     dp.callback_query_handler(process_change_params_button, state=None)
-    dp.callback_query_handler(process_change_currency_div_button, state=FSMChangeParams.param)
+    dp.callback_query_handler(process_change_exchange_div_button, state=FSMChangeParams.param)
     dp.callback_query_handler(process_change_change_dop_button, state=FSMChangeParams.param)
     dp.message_handler(process_param_value, state=FSMChangeParams.value)
     dp.register_callback_query_handler(process_cancel_button, state="*")

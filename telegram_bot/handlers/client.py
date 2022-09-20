@@ -8,7 +8,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
 
 from telegram_bot.init_bot import dp
-from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup
+from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup, car_error_markup
 from parser import get_car_data, calculate_customs, Car, Customs, engine_types
 from exceptions import AnotherUrlError, NotUrlError, CarAttributeEmptyError
 from parser import get_cbr_eu_rate
@@ -150,7 +150,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   f'для расчетов 🛑',
                                   'К сожалению, мы не можем рассчитать для него стоимость ... 😔',
                                   sep="\n\n"),
-                             reply_markup=error_markup,
+                             reply_markup=car_error_markup,
                              parse_mode=ParseMode.MARKDOWN)
     except Exception as ex:
         logger.error(type(ex))

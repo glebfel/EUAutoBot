@@ -6,6 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ParseMode, CallbackQuery
 from aiogram.utils.markdown import text, bold, italic
+from loguru import logger
 
 from telegram_bot.keyboards import (login_markup, authed_markup,
                                     change_params_markup, input_values_markup, show_params_markup, show_stats_markup)
@@ -34,6 +35,7 @@ class FSMChangeParams(StatesGroup):
 
 @dp.message_handler(commands=['moderate'], state=None)
 async def process_moderate_command(message: types.Message):
+    logger.info('/moderate command invoked')
     if check_user(message.from_user.id):
         update_user_last_auth(message.from_user.id)
         await message.answer(text('Приветствую Вас 👋',
@@ -82,6 +84,7 @@ async def process_change_password_button(callback: CallbackQuery):
 
 @dp.message_handler(state=FSMChangePassword.password)
 async def process_password_input(message: types.Message, state: FSMContext):
+    logger.info('Password has been changed!')
     update_password(message.text)
     await message.answer(text('Новый пароль успешно сохранён 👏'),
                          parse_mode=ParseMode.MARKDOWN,
@@ -145,6 +148,7 @@ async def process_param_value(message: types.Message, state: FSMContext):
             await message.answer(text('Значение сохранено ✅'),
                                  parse_mode=ParseMode.MARKDOWN,
                                  reply_markup=authed_markup)
+            logger.info(f'{data["param"]} param has been changed!')
         await state.finish()
     except (TypeError, ValueError):
         await message.answer(text('🛑 Вы ввели некорректное значение 🛑',

@@ -112,6 +112,9 @@ async def process_link_input(message: types.Message, state: FSMContext):
         # calculate customs upon given car info
         customs = await calculate_customs(car)
         await message.answer(await format_bot_output(car, customs),
+                             parse_mode=ParseMode.MARKDOWN)
+        await message.answer(text("Устраивает стоимость? Можете прямо сейчас оформить заказ 📝 на подбор в Германии. "
+                                  "Позвоните нам ☎ или оставьте ваш номер телефона."),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=car_info_markup)
     except NotUrlError as ex:

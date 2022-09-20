@@ -24,5 +24,5 @@ async def get_real_eu_rate() -> float:
     # get CBR official exchange rate
     off_rate = await get_cbr_eu_rate()
     # calculate real exchange rate
-    real_rate = off_rate * (get_param_value('currency_div') / 100 + 1)
+    real_rate = off_rate * (get_param_value('exchange_div') / 100 + 1)
     return real_rate

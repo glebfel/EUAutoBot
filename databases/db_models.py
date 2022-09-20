@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 
 from loguru import logger
-from sqlalchemy import Column, String, Integer, DATE, create_engine, FLOAT, LargeBinary
+from sqlalchemy import Column, String, Integer, DATE, create_engine, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 DB_NAME = 'bot.db'
@@ -34,7 +34,7 @@ class AuthedUsers(Base, IdMixin):
 class Params(Base, IdMixin):
     __tablename__ = 'params'
     param_name = Column(String, unique=True, nullable=False)
-    value = Column(FLOAT, nullable=False)
+    value = Column(Integer, nullable=False)
 
 
 class UserStats(Base, IdMixin):

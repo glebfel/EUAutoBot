@@ -96,7 +96,7 @@ async def process_password_input(message: types.Message, state: FSMContext):
 async def process_show_params_button(callback: CallbackQuery):
     currency_div = get_param_value('currency_div')
     dop = get_param_value('dop')
-    await callback.message.answer(text(f'{bold("Стоимость оформление СБКТС и ЭПТС")}: {int(dop)}₽',
+    await callback.message.answer(text(f'{bold("Стоимость оформление СБКТС и ЭПТС")}: {dop}₽',
                                        f'{bold("Процент разницы курса ЦБ и обменников")}: {currency_div}%',
                                        sep="\n"
                                        ),
@@ -117,9 +117,7 @@ async def process_change_params_button(callback: CallbackQuery):
 
 @dp.callback_query_handler(text='change_currency_div', state=FSMChangeParams.param)
 async def process_change_currency_div_button(callback: CallbackQuery, state=FSMContext):
-    await callback.message.answer(text('Введите число 👇⌨',
-                                       '(доли вводить через точку, например: 23.4)',
-                                       sep="\n"),
+    await callback.message.answer(text('Введите число 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
     await callback.answer()
@@ -130,7 +128,7 @@ async def process_change_currency_div_button(callback: CallbackQuery, state=FSMC
 
 @dp.callback_query_handler(text='change_dop', state=FSMChangeParams.param)
 async def process_change_change_dop_button(callback: CallbackQuery, state=FSMContext):
-    await callback.message.answer(text('Введите число 👇⌨ (доли вводить через точку, например: 23.4)'),
+    await callback.message.answer(text('Введите число 👇⌨'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
     await callback.answer()
@@ -143,7 +141,7 @@ async def process_change_change_dop_button(callback: CallbackQuery, state=FSMCon
 async def process_param_value(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            value = float(message.text)
+            value = int(message.text)
             update_param(data['param'], value)
             await message.answer(text('Значение сохранено ✅'),
                                  parse_mode=ParseMode.MARKDOWN,

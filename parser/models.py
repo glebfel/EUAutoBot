@@ -38,5 +38,5 @@ class Customs(BaseModel):
     util: Rubbles = Field(ge=0, description="Утилизационный сбор")
     util_k: str
     dop: int = Field(ge=0, description="Стоимость оформления СБКТС и ЭПТС")
-    exchange_div: float = Field(ge=0, description="Процент разницы курса ЦБ и обменников")
+    exchange_div: int = Field(ge=0, description="Процент разницы курса ЦБ и обменников")
     total: Rubbles = Field(ge=0, description="Итого")

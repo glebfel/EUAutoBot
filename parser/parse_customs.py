@@ -35,9 +35,12 @@ async def calculate_customs(car: Car) -> Customs:
         if i not in ['tax_k', 'util_k', 'increase_counter']:
             calc_data[i] = calc_data[i].split(',')[0].replace(' ', '')
 
-    # получаем стоимость оформления СБКТС и ЭПТС из бд
+    # get exchange div
+    calc_data["exchange div"] = float(get_param_value('exchange div'))
+
+    # get cost of 'оформление СБКТС и ЭПТС' from db
     calc_data["dop"] = int(get_param_value('dop'))
 
-    # исправляем поле total
+    # recalculate total
     calc_data["total"] = int(calc_data["total"]) + calc_data["dop"]
     return Customs.parse_obj(calc_data)

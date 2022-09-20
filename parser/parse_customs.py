@@ -36,7 +36,7 @@ async def calculate_customs(car: Car) -> Customs:
             calc_data[i] = calc_data[i].split(',')[0].replace(' ', '')
 
     # get exchange div
-    calc_data["exchange div"] = float(get_param_value('exchange div'))
+    calc_data["exchange_div"] = float(get_param_value('exchange_div'))
 
     # get cost of 'оформление СБКТС и ЭПТС' from db
     calc_data["dop"] = int(get_param_value('dop'))

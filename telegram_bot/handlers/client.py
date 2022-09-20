@@ -21,7 +21,7 @@ class FSM(StatesGroup):
 
 async def format_bot_output(car: Car, customs: Customs) -> str:
     if car.price_eu:
-        output_text = text(str(bold(car.name).replace("\\", "")),
+        output_text = text(str(bold(car.name.replace("*", "")).replace("\\", "")),
                            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
                            f"{bold('Дата постановки на учет:')} {car.age}",
                            f"{bold('Пробег:')} {car.mileage} км",
@@ -48,7 +48,7 @@ async def format_bot_output(car: Car, customs: Customs) -> str:
                 "*Такая покупка не всегда выгодна. "
                 "Рекомендуем искать автомобиль с возможностью возврата НДС. Как правило продавцы таких "
                 "автомобилей - автосалоны.\n")).replace("\\", ""),
-            str(bold(car.name).replace("\\", "")),
+            str(bold(car.name.replace("*", "")).replace("\\", "")),
             f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
             f"{bold('Дата постановки на учет:')} {car.age}",
             f"{bold('Пробег:')} {car.mileage} км",

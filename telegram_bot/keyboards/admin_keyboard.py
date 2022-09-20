@@ -12,7 +12,7 @@ get_stats_btn = InlineKeyboardButton('Получить статистику ис
 authed_markup = InlineKeyboardMarkup().add(show_params_btn).add(change_params_btn).add(get_stats_btn).add(change_password_btn).add(exit_btn)
 
 # markup for change params
-change_currency_div_btn = InlineKeyboardButton('Изменить процент разницы курса €', callback_data='change_currency_div')
+change_currency_div_btn = InlineKeyboardButton('Изменить процент разницы курса €', callback_data='change_exchange_div')
 change_dop_btn = InlineKeyboardButton('Изменить стоимость оформление СБКТС и ЭПТС', callback_data='change_dop')
 return_btn = InlineKeyboardButton('Вернуться 🔙', callback_data='return')
 change_params_markup = InlineKeyboardMarkup().add(change_currency_div_btn).add(change_dop_btn).add(return_btn)

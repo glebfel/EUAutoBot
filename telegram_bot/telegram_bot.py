@@ -15,7 +15,7 @@ async def on_startup(_):
     # init and fill db
     create_database()
     add_password('123321')
-    add_param('currency_div', 12)
+    add_param('exchange_div', 12)
     add_param('dop', 50000)
     logger.info('Bot successfully get online!')
 

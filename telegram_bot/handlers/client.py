@@ -166,7 +166,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text='call')
 async def process_call_button(callback: CallbackQuery):
-    await callback.message.answer(text("+74993894054"), reply_markup=get_phone_markup)
+    await callback.message.edit_text(text("+74993894054"), reply_markup=get_phone_markup)
     await callback.answer()
     update_feedback_usage_count(callback.from_user.id)
 

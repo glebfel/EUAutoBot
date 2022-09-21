@@ -165,6 +165,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              )
     finally:
         await state.finish()
+        await state.reset_state()
 
 
 @dp.callback_query_handler(text='call')
@@ -184,6 +185,7 @@ async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
     if current_state is None:
         return
     await state.finish()
+    await state.reset_state()
 
 
 def register_client_handlers(dp: Dispatcher):

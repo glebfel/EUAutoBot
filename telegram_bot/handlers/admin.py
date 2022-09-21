@@ -9,7 +9,7 @@ from aiogram.utils.markdown import text, bold, italic
 from loguru import logger
 
 from telegram_bot.keyboards import (login_markup, authed_markup,
-                                    change_params_markup, input_values_markup, show_params_markup, show_stats_markup)
+                                    change_params_markup, input_values_markup, show_params_markup, show_stats_markup, start_markup)
 from telegram_bot.init_bot import dp
 from databases import (check_password, update_password, update_param, get_param_value,
                        get_number_of_unique_users, get_car_calculation_count_overall, get_feedback_usage_count_overall,
@@ -65,6 +65,7 @@ async def process_password_input(message: types.Message, state: FSMContext):
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=authed_markup)
         await state.finish()
+        await state.reset_state()
     else:
         await message.answer(text('📛 Введён неверный пароль 📛',
                                   'Повторите попытку 🔄',
@@ -90,6 +91,7 @@ async def process_password_input(message: types.Message, state: FSMContext):
                          parse_mode=ParseMode.MARKDOWN,
                          reply_markup=authed_markup)
     await state.finish()
+    await state.reset_state()
 
 
 @dp.callback_query_handler(text='show_params')
@@ -148,6 +150,7 @@ async def process_param_value(message: types.Message, state: FSMContext):
                                  reply_markup=authed_markup)
             logger.info(f'{data["param"]} param has been changed!')
         await state.finish()
+        await state.reset_state()
     except (TypeError, ValueError):
         await message.answer(text('🛑 Некорректное значение 🛑',
                                   'Требуется ввести целочисленное значение (больше нуля)',
@@ -208,16 +211,16 @@ async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
     if current_state is None:
         return
     await state.finish()
+    await state.reset_state()
 
 
-@dp.callback_query_handler(text='exit_admin', state="*")
-async def process_exit_button(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(text("Выполните команду /start чтобы вернуться к началу 🔙"))
-    await callback.answer()
-    current_state = await state.get_state()
-    if current_state is None:
-        return
-    await state.finish()
+@dp.callback_query_handler(text='exit_admin')
+async def process_start_command(callback: CallbackQuery):
+    await callback.message.answer(text('Я могу посчитать стоимость авто 🚘 из Германии "под ключ" в РФ.',
+                                       f'\n\nДля расчета нужна {(italic("ссылка"))} на конкретный авто.',
+                                       f'\n\nЧто бы начать, нажмите кнопку ниже 👇'),
+                                  reply_markup=start_markup,
+                                  parse_mode=ParseMode.MARKDOWN)
 
 
 def register_admin_handlers(dp: Dispatcher):
@@ -230,4 +233,3 @@ def register_admin_handlers(dp: Dispatcher):
     dp.callback_query_handler(process_change_change_dop_button, state=FSMChangeParams.param)
     dp.message_handler(process_param_value, state=FSMChangeParams.value)
     dp.register_callback_query_handler(process_cancel_button, state="*")
-    dp.register_callback_query_handler(process_exit_button, state="*")

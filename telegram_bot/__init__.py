@@ -1,1 +1,1 @@
-from telegram_bot.telegram_bot import run
+from .telegram_bot import run

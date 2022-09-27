@@ -5,7 +5,7 @@ from aiogram.types import ParseMode, CallbackQuery
 from aiogram.utils.markdown import text, italic, bold, link
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from loguru import logger
+from core import custom_logger
 
 from telegram_bot.init_bot import dp
 from telegram_bot.keyboards import start_markup, error_markup, car_info_markup, get_phone_markup, car_error_markup
@@ -119,7 +119,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
     try:
         await message.answer(text('Выполняю запрос ⏳'))
 
-        logger.info(f'Processing "{message.text}" request ...')
+        custom_logger.info(f'Processing "{message.text}" request ...')
         # get info about the car from https://www.mobile.de/
         car = await get_car_data(message.text)
         # calculate customs upon given car info
@@ -132,7 +132,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=car_info_markup)
     except NotUrlError as ex:
-        logger.error(ex)
+        custom_logger.error(ex)
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
                                   f'Бот может обрабатывать ссылки формата: {italic("https://www.mobile.de/example")}'.replace(
                                       "\\", ""),
@@ -143,7 +143,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
     except AnotherUrlError as ex:
-        logger.error(ex)
+        custom_logger.error(ex)
         await message.answer(text('Похоже Вы передали ссылку на другой сайт 🤔',
                                   f'Бот может обрабатывать ссылки формата: {italic("https://www.mobile.de/example")}'.replace(
                                       "\\", ""),
@@ -154,7 +154,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
     except AttributeError as ex:
-        logger.error(ex)
+        custom_logger.error(ex)
         await message.answer(text('Похоже Вы передали ссылку на страницу сайта mobile.de не содержащую данных об авто '
                                   '🤔',
                                   'Для того чтобы правильно передать ссылку:',
@@ -164,8 +164,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
     except CarAttributeEmptyError as ex:
-        logger.error(type(ex))
-        logger.error(ex)
+        custom_logger.error(type(ex))
+        custom_logger.error(ex)
         await message.answer(text(f'Похоже, что объявление которое Вы передали, не содержит параметра "{italic(ex)}" '
                                   f'нужного '
                                   f'для расчетов 🛑',
@@ -174,8 +174,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                              reply_markup=car_error_markup,
                              parse_mode=ParseMode.MARKDOWN)
     except Exception as ex:
-        logger.error(type(ex))
-        logger.error(ex)
+        custom_logger.critical(f"Error {type(ex)} occurred: {ex}")
         await message.answer(text("Что-то пошло не так ... 🥴",
                                   "Повторите попытку позже 😔",
                                   sep="\n\n"),
@@ -189,7 +188,6 @@ async def process_link_input(message: types.Message, state: FSMContext):
 @dp.message_handler(content_types=['music', 'document', 'video', 'photo', 'sticker', 'voice'], state=FSM.link)
 async def process_error_media_link_input(message: types.Message, state: FSMContext):
     await message.answer(text('Выполняю запрос ⏳'))
-    logger.error("Media file was send")
     await message.answer(text('Бот не способен обрабатывать данный тип сообщений 🤯\n',
                               f'Передайте ссылку формата: {italic("https://www.mobile.de/example")}\n'.replace(
                                   "\\", ""),

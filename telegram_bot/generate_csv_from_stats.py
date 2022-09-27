@@ -1,8 +1,6 @@
 import csv
 import pathlib
 
-from loguru import logger
-
 from databases import get_all_users_stats
 
 # current directory
@@ -22,5 +20,3 @@ def create_csv():
         users_data = get_all_users_stats()
         for _ in users_data:
             writer.writerow(_)
-
-    logger.info("CSV file was successfully created!")

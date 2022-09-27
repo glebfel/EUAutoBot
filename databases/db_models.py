@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
 
-from loguru import logger
+from core import custom_logger
 from sqlalchemy import Column, String, Integer, DATE, create_engine, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -49,4 +49,4 @@ class UserStats(Base, IdMixin):
 def create_database():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    logger.info('DB was successfully initialized!')
+    custom_logger.info('DB was successfully initialized!')

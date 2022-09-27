@@ -1,5 +1,5 @@
 from aiogram import Dispatcher, executor
-from loguru import logger
+from core import custom_logger
 
 from telegram_bot.init_bot import dp, bot
 from telegram_bot.handlers import register_client_handlers, register_admin_handlers, register_other_handlers
@@ -17,7 +17,7 @@ async def on_startup(_):
     add_password('123321')
     add_param('exchange_div', 12)
     add_param('dop', 50000)
-    logger.info('Bot successfully get online!')
+    custom_logger.info('Bot successfully get online!')
 
 
 async def shutdown(dp: Dispatcher):

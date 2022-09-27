@@ -221,6 +221,7 @@ async def process_start_command(callback: CallbackQuery):
                                        f'\n\nЧто бы начать, нажмите кнопку ниже 👇'),
                                   reply_markup=start_markup,
                                   parse_mode=ParseMode.MARKDOWN)
+    await callback.answer()
 
 
 def register_admin_handlers(dp: Dispatcher):

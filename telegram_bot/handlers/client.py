@@ -2,7 +2,7 @@ import datetime
 
 from aiogram import types, Dispatcher
 from aiogram.types import ParseMode, CallbackQuery
-from aiogram.utils.markdown import text, italic, bold
+from aiogram.utils.markdown import text, italic, bold, link
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from loguru import logger
@@ -19,31 +19,33 @@ class FSM(StatesGroup):
     link = State()
 
 
-async def format_bot_output(car: Car, customs: Customs) -> str:
+async def format_bot_output(car: Car, customs: Customs, url: str) -> str:
     if car.price_eu:
-        output_text = text(str(bold(car.name.replace("*", "")).replace("\\", "")),
-                           f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
-                           f"{bold('Дата постановки на учет:')} {car.age}",
-                           f"{bold('Пробег:')} {car.mileage:,} км".replace(',', ' '),
-                           f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
-                           f"{bold('Стоимость авто: 💸')}",
-                           f"В Евро: €{car.price_eu:,} без НДС (€{car.price_with_vat_eu:,} с {car.vat}% НДС) НДС=€{car.price_with_vat_eu - car.price_eu:,}".replace(
-                               ',', ' '),
-                           f"В Рублях: ₽{car.price_ru:,} без НДС (₽{car.price_with_vat_ru:,} с {car.vat}% НДС) НДС=₽{car.price_with_vat_ru - car.price_ru:,}".replace(
-                               ',', ' '),
-                           f"\n{bold('Таможенное оформление в РФ:')}",
-                           f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}".replace(',', ' '),
-                           f"{bold('Пошлина:')} ₽{customs.tax:,}".replace(',', ' '),
-                           f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n".replace(',', ' '),
-                           f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n".replace(',', ' ').replace(',',
-                                                                                                                ' '),
-                           bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙\n').replace(',', ' '),
-                           f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_cbr_eu_rate()}₽",
-                           str(italic(
-                               f"*расчет стоимости произведен с учетом курса ЦБ на день запроса +{customs.exchange_div}% (курс обменников). "
-                               "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
-                               "возможных дополнительных платежей.")).replace("\\", ""),
-                           sep="\n")
+        output_text = text(
+            str(bold(car.name.replace("*", "")).replace("\\", "")),
+            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
+            f"{bold('Дата постановки на учет:')} {car.age}",
+            f"{bold('Пробег:')} {car.mileage:,} км".replace(',', ' '),
+            f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
+            f"{bold('Стоимость авто: 💸')}",
+            f"В Евро: €{car.price_eu:,} без НДС (€{car.price_with_vat_eu:,} с {car.vat}% НДС) НДС=€{car.price_with_vat_eu - car.price_eu:,}".replace(
+                ',', ' '),
+            f"В Рублях: ₽{car.price_ru:,} без НДС (₽{car.price_with_vat_ru:,} с {car.vat}% НДС) НДС=₽{car.price_with_vat_ru - car.price_ru:,}".replace(
+                ',', ' '),
+            f"\n{bold('Таможенное оформление в РФ:')}",
+            f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}".replace(',', ' '),
+            f"{bold('Пошлина:')} ₽{customs.tax:,}".replace(',', ' '),
+            f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n".replace(',', ' '),
+            f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n".replace(',', ' ').replace(',',
+                                                                                                 ' '),
+            bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙\n').replace(',', ' '),
+            f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_cbr_eu_rate()}₽",
+            str(italic(
+                f"*расчет стоимости произведен с учетом курса ЦБ на день запроса +{customs.exchange_div}% (курс обменников). "
+                "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
+                "возможных дополнительных платежей.\n")).replace("\\", ""),
+            link('👉 Ссылка на объявление 👈', url),
+            sep="\n")
     else:
         output_text = text(
             f"❗{bold('Машина продается без возможности возврата НДС')}❗",
@@ -69,7 +71,8 @@ async def format_bot_output(car: Car, customs: Customs) -> str:
             str(italic(
                 f"*расчет стоимости произведен с учетом курса ЦБ на день запроса +{customs.exchange_div}% (курс обменников). "
                 "В расчет не включена стоимость доставки авто, услуг возврата НДС, услуг брокеров и др. "
-                "возможных дополнительных платежей.")).replace("\\", ""),
+                "возможных дополнительных платежей.\n")).replace("\\", ""),
+            link('👉 Ссылка на объявление 👈', url),
             sep="\n")
     return output_text
 
@@ -121,10 +124,11 @@ async def process_link_input(message: types.Message, state: FSMContext):
         car = await get_car_data(message.text)
         # calculate customs upon given car info
         customs = await calculate_customs(car)
-        await message.answer(await format_bot_output(car, customs),
+        await message.answer(await format_bot_output(car, customs, message.text),
+                             disable_web_page_preview=True,
                              parse_mode=ParseMode.MARKDOWN)
         await message.answer(text("Устраивает стоимость? Можете прямо сейчас оформить заказ 📝 на подбор в Германии. "
-                                  "Напишите нам в WhatsApp ✏."),
+                                  "Напишите нам в WhatsApp ✏"),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=car_info_markup)
     except NotUrlError as ex:

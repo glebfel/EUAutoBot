@@ -1,1 +1,2 @@
-from core.logger import custom_logger
+from .logger import custom_logger
+from .credentials import settings

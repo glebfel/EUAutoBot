@@ -1,7 +1,7 @@
 from aiogram import Bot
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import Dispatcher
-from telegram_bot.credentials import settings
+from core import settings
 from core import custom_logger
 
 storage = MemoryStorage()

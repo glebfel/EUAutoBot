@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from sqlalchemy import func
 
@@ -22,10 +23,12 @@ def get_start_command_usage_count_by_user(user_id: int) -> int:
             return user.start_command_count
 
 
-def get_car_calculation_count_by_user(user_id: int) -> int:
+def get_car_calculation_count_by_user(user_id: int) -> Optional[int]:
     with SessionLocal() as session:
         user = session.query(UserStats).filter_by(user_id=user_id).first()
-        return user.car_calculation_count
+        if user:
+            return user.car_calculation_count
+        return None
 
 
 def get_feedback_usage_count_by_user(user_id: int) -> int:
@@ -46,6 +49,8 @@ def update_start_command_count(user_id: int):
 
 def update_car_calculation_count(user_id: int):
     current_count = get_car_calculation_count_by_user(user_id)
+    if not current_count:
+        current_count = 0
     with SessionLocal() as session:
         session.query(UserStats).filter_by(user_id=user_id).update({"car_calculation_count": current_count + 1})
         session.commit()

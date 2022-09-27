@@ -27,13 +27,16 @@ async def format_bot_output(car: Car, customs: Customs) -> str:
                            f"{bold('Пробег:')} {car.mileage:,} км".replace(',', ' '),
                            f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
                            f"{bold('Стоимость авто: 💸')}",
-                           f"В Евро: €{car.price_eu:,} без НДС (€{car.price_with_vat_eu:,} с {car.vat}% НДС) НДС=€{car.price_with_vat_eu - car.price_eu:,}".replace(',', ' '),
-                           f"В Рублях: ₽{car.price_ru:,} без НДС (₽{car.price_with_vat_ru:,} с {car.vat}% НДС) НДС=₽{car.price_with_vat_ru - car.price_ru:,}".replace(',', ' '),
+                           f"В Евро: €{car.price_eu:,} без НДС (€{car.price_with_vat_eu:,} с {car.vat}% НДС) НДС=€{car.price_with_vat_eu - car.price_eu:,}".replace(
+                               ',', ' '),
+                           f"В Рублях: ₽{car.price_ru:,} без НДС (₽{car.price_with_vat_ru:,} с {car.vat}% НДС) НДС=₽{car.price_with_vat_ru - car.price_ru:,}".replace(
+                               ',', ' '),
                            f"\n{bold('Таможенное оформление в РФ:')}",
                            f"{bold('Таможенный сбор:')} ₽{customs.sbor:,}".replace(',', ' '),
                            f"{bold('Пошлина:')} ₽{customs.tax:,}".replace(',', ' '),
                            f"{bold('Утилизационный сбор:')} ₽{customs.util:,}\n".replace(',', ' '),
-                           f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n".replace(',', ' ').replace(',', ' '),
+                           f"{bold('Оформление СБКТС и ЭПТС:')} ~ ₽{customs.dop:,}\n".replace(',', ' ').replace(',',
+                                                                                                                ' '),
                            bold(f'Итого: ₽{car.price_ru + customs.total:,} 🚙\n').replace(',', ' '),
                            f"Дата проведения расчета: {datetime.datetime.today().date()}, курс ЦБ 1€ = {await get_cbr_eu_rate()}₽",
                            str(italic(
@@ -120,6 +123,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
     except NotUrlError as ex:
         logger.error(ex)
         await message.answer(text('Ой ... Кажется Вы передали не ссылку 🤨',
+                                  f'Бот может обрабатывать ссылки формата: {italic("https://www.mobile.de/example")}'.replace(
+                                      "\\", ""),
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
                                   f'◽ воспользуйтесь кнопкой {(italic("поделиться ссылкой"))} в приложении 📱',
@@ -129,7 +134,8 @@ async def process_link_input(message: types.Message, state: FSMContext):
     except AnotherUrlError as ex:
         logger.error(ex)
         await message.answer(text('Похоже Вы передали ссылку на другой сайт 🤔',
-                                  f'Бот может обрабатывать ссылки формата: {italic("https://www.mobile.de/example")}'.replace("\\", ""),
+                                  f'Бот может обрабатывать ссылки формата: {italic("https://www.mobile.de/example")}'.replace(
+                                      "\\", ""),
                                   'Для того чтобы правильно передать ссылку:',
                                   '◽ скопируйте её из адресной строки браузера 🌐',
                                   f'◽ воспользуйтесь кнопкой {(italic("поделиться ссылкой"))} в приложении 📱',
@@ -167,6 +173,24 @@ async def process_link_input(message: types.Message, state: FSMContext):
     finally:
         await state.finish()
         await state.reset_state()
+
+
+@dp.message_handler(content_types=['music', 'document', 'video', 'photo', 'sticker', 'voice'], state=FSM.link)
+async def process_error_media_link_input(message: types.Message, state: FSMContext):
+    await message.answer(text('Выполняю запрос ⏳'))
+    logger.error("Media file was send")
+    await message.answer(text('Бот не способен обрабатывать данный тип сообщений 🤯\n',
+                              f'Передайте ссылку формата: {italic("https://www.mobile.de/example")}\n'.replace(
+                                      "\\", ""),
+                              'Для того чтобы правильно передать ссылку:\n',
+                              '◽ скопируйте её из адресной строки браузера 🌐\n',
+                              f'◽ воспользуйтесь кнопкой {(italic("поделиться ссылкой"))} в приложении 📱',
+                              sep="\n"),
+                         reply_markup=error_markup,
+                         parse_mode=ParseMode.MARKDOWN)
+
+    await state.finish()
+    await state.reset_state()
 
 
 @dp.callback_query_handler(text='call')

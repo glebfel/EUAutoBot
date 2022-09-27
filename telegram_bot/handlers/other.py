@@ -4,7 +4,7 @@ from aiogram.utils.markdown import text
 from telegram_bot.init_bot import dp
 
 
-@dp.message_handler()
+@dp.message_handler(content_types=['text', 'music', 'document', 'video', 'photo', 'sticker', 'voice'])
 async def process_other_commands(message: types.Message):
     await message.answer(text("Не могу распознать введенную команду 🧐❗",
                               "\nДля просмотра доступных команд воспользуйтесь /help 🧾"),

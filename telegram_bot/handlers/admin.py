@@ -9,11 +9,10 @@ from aiogram.utils.markdown import text, bold, italic
 
 from core import custom_logger
 from telegram_bot.keyboards import (login_markup, authed_markup,
-                                    change_params_markup, input_values_markup, show_params_markup, show_stats_markup, start_markup)
+                                    change_params_markup, input_values_markup, show_params_markup, show_stats_markup,
+                                    start_markup)
 from telegram_bot.init_bot import dp
-from databases import (check_password, update_password, update_param, get_param_value,
-                       get_number_of_unique_users, get_car_calculation_count_overall, get_feedback_usage_count_overall,
-                       get_start_command_usage_overall, add_user, update_user_last_auth, check_user)
+from databases import *
 from telegram_bot.generate_csv_from_stats import create_csv
 
 # csv file directory
@@ -31,6 +30,10 @@ class FSMChangePassword(StatesGroup):
 class FSMChangeParams(StatesGroup):
     param = State()
     value = State()
+
+
+class FSMSpamUsers(StatesGroup):
+    message = State()
 
 
 @dp.message_handler(commands=['moderate'], state=None)
@@ -200,6 +203,28 @@ async def process_download_csv_button(callback: CallbackQuery):
     await callback.answer()
 
 
+@dp.callback_query_handler(text='spam', state=None)
+async def process_spam_button(callback: CallbackQuery):
+    await FSMSpamUsers.message.set()
+    await callback.message.answer(text('Наберите текст рассылки 👇⌨'),
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=input_values_markup)
+    await callback.answer()
+
+
+@dp.message_handler(state=FSMSpamUsers.message)
+async def process_spam_message(message: types.Message, state: FSMContext):
+    # get all users
+    for _ in get_all_users_stats():
+        if message.from_user.id != _['ID пользователя']:
+            await dp.bot.send_message(chat_id=_['ID пользователя'], text=message.text)
+    await message.answer(text('Рассылка выполнена ✅'),
+                         parse_mode=ParseMode.MARKDOWN,
+                         reply_markup=authed_markup)
+    await state.finish()
+    await state.reset_state()
+
+
 @dp.callback_query_handler(text='return', state="*")
 @dp.callback_query_handler(text='cancel_admin', state="*")
 async def process_cancel_button(callback: CallbackQuery, state: FSMContext):
@@ -227,10 +252,12 @@ async def process_start_command(callback: CallbackQuery):
 def register_admin_handlers(dp: Dispatcher):
     dp.register_message_handler(process_moderate_command, commands=['moderate'], state=None)
     dp.register_message_handler(process_password_input, state=FSMLogin.password)
-    dp.callback_query_handler(process_change_password_button, state=None)
+    dp.register_callback_query_handler(process_change_password_button, state=None)
     dp.register_message_handler(process_password_input, state=FSMChangePassword.password)
-    dp.callback_query_handler(process_change_params_button, state=None)
-    dp.callback_query_handler(process_change_exchange_div_button, state=FSMChangeParams.param)
-    dp.callback_query_handler(process_change_change_dop_button, state=FSMChangeParams.param)
-    dp.message_handler(process_param_value, state=FSMChangeParams.value)
+    dp.register_callback_query_handler(process_change_params_button, state=None)
+    dp.register_callback_query_handler(process_change_exchange_div_button, state=FSMChangeParams.param)
+    dp.register_callback_query_handler(process_change_change_dop_button, state=FSMChangeParams.param)
+    dp.register_message_handler(process_param_value, state=FSMChangeParams.value)
+    dp.register_callback_query_handler(process_spam_button, state=None)
+    dp.register_message_handler(process_spam_message, state=FSMSpamUsers.message)
     dp.register_callback_query_handler(process_cancel_button, state="*")

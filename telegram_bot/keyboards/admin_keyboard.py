@@ -9,7 +9,8 @@ change_password_btn = InlineKeyboardButton('Изменить пароль 🔑',
 show_params_btn = InlineKeyboardButton('Показать текущие параметры расчётов 🎛', callback_data='show_params')
 change_params_btn = InlineKeyboardButton('Изменить параметры расчётов ⚙', callback_data='change_params')
 get_stats_btn = InlineKeyboardButton('Получить статистику использования бота 📊', callback_data='get_stats')
-authed_markup = InlineKeyboardMarkup().add(show_params_btn).add(change_params_btn).add(get_stats_btn).add(change_password_btn).add(exit_btn)
+spam_btn = InlineKeyboardButton('Сделать рассылку 📤', callback_data='spam')
+authed_markup = InlineKeyboardMarkup().add(show_params_btn).add(change_params_btn).add(get_stats_btn).add(change_password_btn).add(spam_btn).add(exit_btn)
 
 # markup for change params
 change_currency_div_btn = InlineKeyboardButton('Изменить процент разницы курса €', callback_data='change_exchange_div')

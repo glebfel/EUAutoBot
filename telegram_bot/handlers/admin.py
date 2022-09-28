@@ -212,12 +212,20 @@ async def process_spam_button(callback: CallbackQuery):
     await callback.answer()
 
 
-@dp.message_handler(state=FSMSpamUsers.message)
+@dp.message_handler(content_types=['text', 'document', 'video', 'photo', 'voice'], state=FSMSpamUsers.message)
 async def process_spam_message(message: types.Message, state: FSMContext):
-    # get all users
     for _ in get_all_users_stats():
         if message.from_user.id != _['ID пользователя']:
-            await dp.bot.send_message(chat_id=_['ID пользователя'], text=message.text)
+            if message.document:
+                await dp.bot.send_document(chat_id=_['ID пользователя'], document=message.document, caption=message.text)
+            if message.video:
+                await dp.bot.send_video(chat_id=_['ID пользователя'], video=message.video, caption=message.text)
+            if message.photo:
+                await dp.bot.send_photo(chat_id=_['ID пользователя'], photo=message.photo, caption=message.text)
+            if message.voice:
+                await dp.bot.send_voice(chat_id=_['ID пользователя'], photo=message.voice)
+            if message.text:
+                await dp.bot.send_message(chat_id=_['ID пользователя'], text=message.text)
     await message.answer(text('Рассылка выполнена ✅'),
                          parse_mode=ParseMode.MARKDOWN,
                          reply_markup=authed_markup)

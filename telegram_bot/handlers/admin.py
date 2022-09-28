@@ -206,7 +206,7 @@ async def process_download_csv_button(callback: CallbackQuery):
 @dp.callback_query_handler(text='spam', state=None)
 async def process_spam_button(callback: CallbackQuery):
     await FSMSpamUsers.message.set()
-    await callback.message.answer(text('Наберите текст рассылки 👇⌨'),
+    await callback.message.answer(text('Наберите текст рассылки 👇⌨ (можно прикреплять фото, видео, аудио, документы)'),
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=input_values_markup)
     await callback.answer()

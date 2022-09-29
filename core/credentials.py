@@ -8,6 +8,7 @@ DIR_PATH = str(pathlib.Path(__file__).parent)
 
 class Settings(BaseSettings):
     API_KEY: str = Field(..., env="API_KEY")
+    BOT_ADMIN_PASSWORD = Field(..., env="BOT_ADMIN_PASSWORD")
 
     class Config:
         env_prefix = ""

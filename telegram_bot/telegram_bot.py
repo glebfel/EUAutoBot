@@ -1,6 +1,7 @@
 from aiogram import Dispatcher, executor
 from core import custom_logger
 
+from core.credentials import settings
 from telegram_bot.init_bot import dp, bot
 from telegram_bot.handlers import register_client_handlers, register_admin_handlers, register_other_handlers
 from databases import create_database, add_password, add_param
@@ -14,7 +15,7 @@ async def on_startup(_):
     register_other_handlers(dp)
     # init and fill db
     create_database()
-    add_password('123321')
+    add_password(settings.BOT_ADMIN_PASSWORD)
     add_param('exchange_div', 12)
     add_param('dop', 50000)
     custom_logger.info('Bot successfully get online!')

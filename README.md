@@ -1,5 +1,4 @@
 ![Python](https://img.shields.io/badge/Python-14354C?style=badge&logo=python&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=badge&logo=docker&logoColor=white)
 
 # EUAutoBot

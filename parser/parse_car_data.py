@@ -119,20 +119,25 @@ async def get_car_data(url: str) -> Car:
         for i in stats:
             # parse first registration
             if any(x in i.text for x in ['Первая регистрация', 'Erstzulassung', 'First Registration']):
-                car['age'] = list(i.children)[1].text.strip()
-                car['age_formatted'] = _validate_age(list(i.children)[1].text)
+                if not car.get('age'):
+                    car['age'] = list(i.children)[1].text.strip()
+                    car['age_formatted'] = _validate_age(list(i.children)[1].text)
             # parse engine type
             if any(x in i.text for x in ['Топливо', 'Kraftstoffart', 'Fuel']):
-                car['engine'] = _validate_engine(list(i.children)[1].text)
+                if not car.get('engine'):
+                    car['engine'] = _validate_engine(list(i.children)[1].text)
             # parse engine power
             if any(x in i.text for x in ['Мощность', 'Leistung', 'Power']):
-                car['power'] = list(i.children)[1].text.split()[2].replace("(", " ")
+                if not car.get('power'):
+                    car['power'] = list(i.children)[1].text.split()[2].replace("(", " ")
             # parse engine capacity
             if any(x in i.text for x in ['Объем двигателя', 'Hubraum', 'Cubic Capacity']):
-                car['value'] = _validate_digit_value(list(i.children)[1].text)
+                if not car.get('value'):
+                    car['value'] = _validate_digit_value(list(i.children)[1].text)
             # parse mileage
             if any(x in i.text for x in ['Пробег', 'Kilometerstand', 'Mileage']):
-                car['mileage'] = _validate_digit_value(list(i.children)[1].text)
+                if not car.get('mileage'):
+                    car['mileage'] = _validate_digit_value(list(i.children)[1].text)
             # parse damages
             if any(x in i.text for x in ['Состояние транспортного средства', 'Fahrzeugzustand', 'Vehicle condition']):
                 if any(x in i.text for x in ['Не попадало в ДТП', 'Unfallfrei', 'Accident-free']):
@@ -191,7 +196,10 @@ async def get_car_data(url: str) -> Car:
                             val += _
                     car["value"] = int(float(val) * 1000)
                     return Car.parse_obj(car)
-            raise exceptions.CarAttributeEmptyError("Объем двигателя")
+            raise exceptions.CarAttributeEmptyError('"Объем двигателя"')
+        if 'damaged' not in car:
+            car['damaged'] = False
+            return Car.parse_obj(car)
         raise exceptions.CarAttributeEmptyError()
 
 

@@ -166,7 +166,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
     except CarAttributeEmptyError as ex:
         custom_logger.error(type(ex))
         custom_logger.error(ex)
-        await message.answer(text(f'Похоже, что объявление которое Вы передали, не содержит параметра "{italic(ex)}" '
+        await message.answer(text(f'Похоже, что объявление которое Вы передали, не содержит параметра {italic(ex)} '
                                   f'нужного '
                                   f'для расчетов 🛑',
                                   'К сожалению, мы не можем рассчитать для него стоимость ... 😔',

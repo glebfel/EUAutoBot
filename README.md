@@ -18,7 +18,7 @@ docker build -t eu_bot ./EUAutoBot
 docker run -d eu_bot
 ```
 
-# Остановка сервиса
+# Остановка бота
 
 Для остановки бота нужно ввести команду
 ```

@@ -5,7 +5,7 @@ from core import settings
 from databases import create_database, add_password, add_param
 
 DB_NAME = 'bot.db'
-DB_PATH = str(Path(__file__).parent) + '/db_file/' + DB_NAME
+DB_PATH = str(Path(__file__).parent) + '/' + DB_NAME
 
 
 def start_database():

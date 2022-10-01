@@ -1,6 +1,6 @@
-version: '2'
+version: "2"
 services:
   eu_bot:
     build: .
-  volumes:
-    - ./databases:/app/databases/
+    volumes:
+      - ./databases:/app/databases

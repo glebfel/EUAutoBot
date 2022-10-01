@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, Integer, DATE, create_engine, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 DB_NAME = 'bot.db'
-DB_PATH = str(Path(__file__).parent) + '/' + DB_NAME
+DB_PATH = str(Path(__file__).parent) + '/db_file/' + DB_NAME
 
 # create db object
 Base = declarative_base()

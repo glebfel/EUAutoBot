@@ -15,4 +15,5 @@ def start_database():
         add_password(settings.BOT_ADMIN_PASSWORD)
         add_param('exchange_div', 12)
         add_param('dop', 50000)
+        custom_logger.info('DB was successfully created!')
     custom_logger.info('DB was successfully initialized!')

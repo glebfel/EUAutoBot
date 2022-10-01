@@ -1,12 +1,9 @@
 import datetime
-from os.path import exists
 from pathlib import Path
 
-from core import custom_logger, settings
 from sqlalchemy import Column, String, Integer, DATE, create_engine, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from databases import add_password, add_param
 
 DB_NAME = 'bot.db'
 DB_PATH = str(Path(__file__).parent) + '/' + DB_NAME
@@ -49,10 +46,5 @@ class UserStats(Base, IdMixin):
     last_usage_date = Column(DATE, default=datetime.date.today())
 
 
-def start_database():
-    if not exists(DB_PATH):
-        Base.metadata.create_all(bind=engine)
-        add_password(settings.BOT_ADMIN_PASSWORD)
-        add_param('exchange_div', 12)
-        add_param('dop', 50000)
-    custom_logger.info('DB was successfully initialized!')
+def create_database():
+    Base.metadata.create_all(bind=engine)

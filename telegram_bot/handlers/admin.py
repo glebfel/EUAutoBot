@@ -169,21 +169,10 @@ async def process_get_stats_button(callback: CallbackQuery):
     create_csv()
     # make formatted output
     count_overall_usage = get_start_command_usage_overall()
-    count_today_usage = get_start_command_usage_overall(from_timespan=datetime.date.today())
     count_unique_users_overall = get_number_of_unique_users()
-    count_unique_users_today = get_number_of_unique_users(from_timespan=datetime.date.today())
     count_car_calculation_overall = get_car_calculation_count_overall()
-    count_car_calculation_today = get_car_calculation_count_overall(from_timespan=datetime.date.today())
     count_feedback_request_overall = get_feedback_usage_count_overall()
-    count_feedback_request_today = get_feedback_usage_count_overall(from_timespan=datetime.date.today())
     await callback.message.answer(text(bold('Статистика использования бота 📊'),
-                                       bold("\nЗа сегодня:"),
-                                       f"{italic('Количество использований бота:')} {count_today_usage}",
-                                       f"{italic('Количество уникальных пользователей:')} {count_unique_users_today}",
-                                       f"{italic('Количество проведённых расчётов стоимости авто:')} {count_car_calculation_today}",
-                                       str(italic(
-                                           f'Количество запросов на получение обратной связи (звонки): {count_feedback_request_today}')).replace(
-                                           '\\', ''),
                                        bold("\nЗа всё время:"),
                                        f"{italic('Количество использований бота:')} {count_overall_usage}",
                                        f"{italic('Количество уникальных пользователей:')} {count_unique_users_overall}",

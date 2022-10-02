@@ -40,7 +40,7 @@ class Params(Base, IdMixin):
 class UserStats(Base, IdMixin):
     __tablename__ = 'user_stats'
     user_id = Column(Integer, unique=True, nullable=False)
-    start_command_count = Column(Integer, default=1)
+    start_command_count = Column(Integer, default=0)
     car_calculation_count = Column(Integer, default=0)
     feedback_usage_count = Column(Integer, default=0)
     last_usage_date = Column(DATE, default=datetime.date.today())

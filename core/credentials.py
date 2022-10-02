@@ -1,6 +1,5 @@
 import pathlib
 from pydantic import BaseSettings, Field
-from dotenv import load_dotenv
 
 # root directory
 ROOT_PATH = str(pathlib.Path(__file__).parent.parent)
@@ -16,9 +15,6 @@ class Settings(BaseSettings):
         env_file = '.env'
         env_file_encoding = 'utf-8'
 
-
-# load variables from .env
-load_dotenv(dotenv_path=ROOT_PATH + "/config.env")
 
 # load vars to settings
 settings = Settings()

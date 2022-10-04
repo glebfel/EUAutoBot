@@ -1,5 +1,6 @@
 import datetime
 
+import arsenic
 from aiogram import types, Dispatcher
 from aiogram.types import ParseMode, CallbackQuery
 from aiogram.utils.markdown import text, italic, bold, link
@@ -163,6 +164,7 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=error_markup,
                              parse_mode=ParseMode.MARKDOWN)
+
     except CarAttributeEmptyError as ex:
         custom_logger.error(type(ex))
         custom_logger.error(ex)
@@ -173,6 +175,16 @@ async def process_link_input(message: types.Message, state: FSMContext):
                                   sep="\n\n"),
                              reply_markup=car_error_markup,
                              parse_mode=ParseMode.MARKDOWN)
+
+    except arsenic.errors.ArsenicTimeout as ex:
+        custom_logger.error(ex)
+        custom_logger.error(type(ex))
+        await message.answer(text(f'https://www.mobile.de/ не отвечает ... 💭',
+                                  'Повторите попытку позже 🔄',
+                                  sep="\n\n"),
+                             reply_markup=car_error_markup,
+                             parse_mode=ParseMode.MARKDOWN)
+
     except Exception as ex:
         custom_logger.critical(f"Error {type(ex)} occurred: {ex}")
         await message.answer(text("Что-то пошло не так ... 🥴",

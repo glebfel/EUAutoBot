@@ -65,7 +65,7 @@ def _validate_engine(engine: str) -> int:
         return 2
     if re.split(', | \\(', engine.strip())[0] in ['Гибридный', 'Hybrid']:
         return 3
-    if re.split(', | \\(', engine.strip())[0] in ['Электрический', 'Electric']:
+    if re.split(', | \\(', engine.strip())[0] in ['Электрический', 'Electric', 'Elektro']:
         return 4
 
 
@@ -185,18 +185,6 @@ async def get_car_data(url: str) -> Car:
 
         return Car.parse_obj(car)
     except ValidationError:
-        if 'value' not in car:
-            # try to parse value from name
-            value = car["name"].split()
-            for i in value:
-                if "." in i or "," in i:
-                    val = ""
-                    for _ in i:
-                        if _.isdigit() or _ in [",", "."]:
-                            val += _
-                    car["value"] = int(float(val) * 1000)
-                    return Car.parse_obj(car)
-            raise exceptions.CarAttributeEmptyError('"Объем двигателя"')
         if 'damaged' not in car:
             car['damaged'] = False
             return Car.parse_obj(car)

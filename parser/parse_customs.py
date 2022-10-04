@@ -13,16 +13,18 @@ BASIC_HEADER = {"Accept": "*/*",
 async def calculate_customs(car: Car) -> Customs:
     # fill form data
     form_data = {
-        "calculate": 1,
-        "owner": car.owner,
-        "age": car.age_formatted,
-        "engine": car.engine,
-        "power": car.power,
-        "power_unit": car.power_unit,
-        "value": car.value,
-        "price": car.price_with_vat_eu,
-        "currency": "eur",
+        'calculate': 1,
+        'owner': car.owner,
+        'age': car.age_formatted,
+        'engine': car.engine,
+        'power': car.power,
+        'power_unit': car.power_unit,
+        'price': car.price_with_vat_eu,
+        'currency': 'eur',
     }
+    # if engine type = 4 (electric) omit value param
+    if car.engine != 4:
+        form_data['value'] = car.value
 
     # get calculations
     session = aiohttp.ClientSession(headers=BASIC_HEADER)

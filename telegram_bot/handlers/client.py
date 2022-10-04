@@ -23,7 +23,7 @@ async def format_bot_output(car: Car, customs: Customs, url: str) -> str:
     if car.price_eu:
         output_text = text(
             str(bold(car.name.replace("*", "")).replace("\\", "")),
-            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
+            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {str(car.value) + ' см³,' if car.value else ' '}{car.power} л.с.",
             f"{bold('Дата постановки на учет:')} {car.age}",
             f"{bold('Пробег:')} {car.mileage:,} км".replace(',', ' '),
             f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",
@@ -54,7 +54,7 @@ async def format_bot_output(car: Car, customs: Customs, url: str) -> str:
                 "Рекомендуем искать автомобиль с возможностью возврата НДС. Как правило продавцы таких "
                 "автомобилей - автосалоны.\n")).replace("\\", ""),
             str(bold(car.name.replace("*", "")).replace("\\", "")),
-            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {car.value} см³, {car.power} л.с.",
+            f"\n{bold('Двигатель:')} {engine_types.get(car.engine)}, {str(car.value) + ' см³,' if car.value else ' '}{car.power} л.с.",
             f"{bold('Дата постановки на учет:')} {car.age}",
             f"{bold('Пробег:')} {car.mileage:,} км".replace(',', ' '),
             f"{'🛑 Была в ДТП' if car.damaged else '✅ Не попадала в ДТП'}\n",

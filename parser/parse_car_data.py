@@ -17,11 +17,7 @@ from pydantic import ValidationError
 # Корень проекта
 DIR_PATH = str(pathlib.Path(__file__).parent)
 
-if sys.platform.startswith('win'):
-    GECKODRIVER = DIR_PATH + '/geckodriver.exe'
-else:
-    GECKODRIVER = DIR_PATH + '/geckodriver'
-
+GECKODRIVER = DIR_PATH + '/geckodriver.exe'
 custom_logger.info(GECKODRIVER)
 
 BASIC_HEADER = {"Accept": "application/json",

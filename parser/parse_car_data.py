@@ -7,7 +7,7 @@ import re
 
 import validators
 import exceptions
-from core import logger
+from core import custom_logger
 from parser.models import Car
 from bs4 import BeautifulSoup
 from arsenic import services, browsers, get_session
@@ -22,7 +22,7 @@ if sys.platform.startswith('win'):
 else:
     GECKODRIVER = DIR_PATH + '/geckodriver'
 
-logger.info(GECKODRIVER)
+custom_logger.info(GECKODRIVER)
 
 BASIC_HEADER = {"Accept": "application/json",
                 "referer": "https://www.mobile.de/",

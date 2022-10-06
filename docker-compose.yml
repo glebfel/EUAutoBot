@@ -5,4 +5,4 @@ services:
     volumes:
       - ./databases:/app/databases
     env_file:
-      - ./config.env
+      - .env

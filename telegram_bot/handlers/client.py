@@ -127,6 +127,9 @@ async def process_link_input(message: types.Message, state: FSMContext):
         customs = await calculate_customs(car)
         await message.answer(await format_bot_output(car, customs, message.text),
                              disable_web_page_preview=True,
+                             parse_mode=ParseMode.MARKDOWN)
+        await message.answer(text("Устраивает стоимость? Можете прямо сейчас оформить заказ 📝 на подбор в Германии. "
+                                  "Напишите нам в WhatsApp ✏"),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=car_info_markup)
     except NotUrlError as ex:

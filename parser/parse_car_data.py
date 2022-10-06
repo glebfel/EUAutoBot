@@ -1,4 +1,4 @@
-# parse https://www.mobile.de/h
+# parse https://www.mobile.de/
 
 import pathlib
 import sys

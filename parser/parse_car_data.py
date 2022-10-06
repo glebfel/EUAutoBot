@@ -20,7 +20,7 @@ DIR_PATH = str(pathlib.Path(__file__).parent)
 if sys.platform.startswith('win'):
     GECKODRIVER = DIR_PATH + '/geckodriver.exe'
 else:
-    GECKODRIVER = DIR_PATH + '/geckodriver'
+    GECKODRIVER = '/usr/local/bin/geckodriver'
 
 custom_logger.info(GECKODRIVER)
 

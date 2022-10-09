@@ -62,8 +62,7 @@ def _validate_age(age: str) -> str:
 def _validate_engine(engine: str) -> int:
     """validate engine type (https://calcus.ru/ format)"""
 
-    if re.split(', | \\(', engine.strip())[0] in ['Бензиновый', 'Benzin', 'Petrol',
-                                                  'Природный газ', 'Natural Gas', 'Erdgas']:
+    if re.split(', | \\(', engine.strip())[0] in ['Бензиновый', 'Benzin', 'Petrol']:
         return 1
     if re.split(', | \\(', engine.strip())[0] in ['Дизельный', 'Diesel']:
         return 2
@@ -71,6 +70,8 @@ def _validate_engine(engine: str) -> int:
         return 3
     if re.split(', | \\(', engine.strip())[0] in ['Электрический', 'Electric', 'Elektro']:
         return 4
+    if re.split(', | \\(', engine.strip())[0] in ['Природный газ', 'Natural Gas', 'Erdgas']:
+        return 5
 
 
 def _validate_digit_value(digit_value: str) -> str:

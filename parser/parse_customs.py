@@ -26,6 +26,10 @@ async def calculate_customs(car: Car) -> Customs:
     if car.engine != 4:
         form_data['value'] = car.value
 
+    # if engine type = 5 (natural gas) change to 1 (gasoline) - it`s doesn't matter
+    if car.engine == 5:
+        form_data['engine'] = 1
+
     # get calculations
     session = aiohttp.ClientSession(headers=BASIC_HEADER)
     async with session.post(BASE_URL, data=form_data) as resp:

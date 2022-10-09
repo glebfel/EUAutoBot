@@ -62,7 +62,8 @@ def _validate_age(age: str) -> str:
 def _validate_engine(engine: str) -> int:
     """validate engine type (https://calcus.ru/ format)"""
 
-    if re.split(', | \\(', engine.strip())[0] in ['Бензиновый', 'Benzin', 'Petrol']:
+    if re.split(', | \\(', engine.strip())[0] in ['Бензиновый', 'Benzin', 'Petrol',
+                                                  'Природный газ', 'Natural Gas', 'Erdgas']:
         return 1
     if re.split(', | \\(', engine.strip())[0] in ['Дизельный', 'Diesel']:
         return 2
@@ -192,5 +193,8 @@ async def get_car_data(url: str) -> Car:
             car['damaged'] = False
             return Car.parse_obj(car)
         raise exceptions.CarAttributeEmptyError()
+    except Exception as e:
+        print(e)
+        print(type(e))
 
 
